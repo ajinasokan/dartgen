@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -10,10 +11,15 @@ import (
 	"github.com/ajinasokan/util"
 )
 
+var log = fmt.Println
+
 const serializeTmpl = `
 	{{.Name}}({
 {{range .Fields }}    {{.Type}} {{.Name}},{{"\n"}}{{ end }}	}) {
 {{range .Fields }}    this.{{.Name}} = {{.Name}} ?? this.{{.Name}};{{"\n"}}{{ end }}	}
+
+	void patch(Map<String, dynamic> data) {
+{{range .Fields }}    this.{{.Name}} = {{.FromMap}} ?? this.{{.Name}};{{"\n"}}{{ end }}	}
 
   Map<String, dynamic> toMap() {
     return {
@@ -60,7 +66,7 @@ type fieldDef struct {
 func main() {
 	args := os.Args[1:]
 	if len(args) < 2 {
-		util.Log("Not enough args")
+		log("Not enough args")
 		return
 	}
 	generator := args[0]
@@ -77,7 +83,7 @@ func main() {
 	} else if generator == "index" {
 		generateIndex(files[0])
 	} else {
-		util.Log("Invalid generator")
+		log("Invalid generator")
 	}
 }
 
@@ -94,7 +100,7 @@ func generateIndex(dirName string) {
 }
 
 func generateEnum(fileName string) {
-	util.Log("Processing", fileName)
+	log("Processing", fileName)
 
 	out, _ := util.ReadTextFile(fileName)
 
@@ -109,7 +115,7 @@ func generateEnum(fileName string) {
 			Definition: class[2],
 		}
 
-		util.Log("Enumeration added for", c.Name)
+		log("Enumeration added for", c.Name)
 
 		fieldExp := regexp.MustCompile(`(?is)"(.*?)".*?"(.*?)",`)
 		rawFields := fieldExp.FindAllStringSubmatch(c.Definition, -1)
@@ -135,7 +141,7 @@ func generateEnum(fileName string) {
 }
 
 func generateModel(fileName string) {
-	util.Log("Processing", fileName)
+	log("Processing", fileName)
 
 	out, _ := util.ReadTextFile(fileName)
 
@@ -150,7 +156,7 @@ func generateModel(fileName string) {
 			Definition: class[2],
 		}
 
-		util.Log("Serializer added for", c.Name)
+		log("Serializer added for", c.Name)
 
 		fieldExp := regexp.MustCompile(`(?is)@pragma\(.json:.(.*?)..\)\s+((.*?)(<.*?>){0,1})\s+(.*?)((\s*=\s*(.*?))|.{0});`)
 		rawFields := fieldExp.FindAllStringSubmatch(c.Definition, -1)
