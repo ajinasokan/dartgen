@@ -129,7 +129,7 @@ func generateEnum(fileName string) {
 		enumeration := util.ExecTemplate(enumerationTmpl, c)
 
 		// REPLACE
-		genExp := regexp.MustCompile(`(?is)(class.` + c.Name + `)(.*?)(//GENERATED)(.*?)(//GENERATED)`)
+		genExp := regexp.MustCompile(`(?is)(class\s` + c.Name + `\s)(.*?)(//GENERATED)(.*?)(//GENERATED)`)
 		if c.Serialize {
 			out = genExp.ReplaceAllString(out, "${1}${2}${3}"+enumeration+"${5}")
 		} else {
@@ -194,7 +194,7 @@ func generateModel(fileName string) {
 		serialize := util.ExecTemplate(serializeTmpl, c)
 
 		// REPLACE
-		genExp := regexp.MustCompile(`(?is)(class.` + c.Name + `)(.*?)(//GENERATED)(.*?)(//GENERATED)`)
+		genExp := regexp.MustCompile(`(?is)(class\s` + c.Name + `\s)(.*?)(//GENERATED)(.*?)(//GENERATED)`)
 		if c.Serialize {
 			out = genExp.ReplaceAllString(out, "${1}${2}${3}"+serialize+"${5}")
 		} else {
