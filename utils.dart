@@ -6,24 +6,26 @@ import 'package:dart_style/dart_style.dart';
 
 export 'package:analyzer/analyzer.dart';
 
-String scriptPath(String path) {
-  return normalize(dirname(Platform.script.toFilePath()) + '/' + path);
-}
+// String scriptPath(String path) {
+//   return normalize(dirname(Platform.script.toFilePath()) + '/' + path);
+// }
 
 List<String> listFiles(String path) {
   List<String> files = [];
-  var dir = new Directory(scriptPath(path));
+  try {
+    var dir = new Directory(path);
 
-  final dartFile = new Glob("**.dart");
+    final dartFile = new Glob("**.dart");
 
-  List contents = dir.listSync();
+    List contents = dir.listSync();
 
-  for (var fileOrDir in contents) {
-    if (dartFile.matches(fileOrDir.path) &&
-        basename(fileOrDir.path) != 'index.dart') {
-      files.add(fileOrDir.path);
+    for (var fileOrDir in contents) {
+      if (dartFile.matches(fileOrDir.path) &&
+          basename(fileOrDir.path) != 'index.dart') {
+        files.add(fileOrDir.path);
+      }
     }
-  }
+  } catch (e) {}
 
   return files;
 }
@@ -33,11 +35,15 @@ String fileName(String path) {
 }
 
 CompilationUnit readFile(String path) {
-  return parseDartFile(path);
+  try {
+    return parseDartFile(path);
+  } catch (e) {
+    return null;
+  }
 }
 
 void saveFile(String path, String data) {
-  new File(scriptPath(path)).writeAsString(data);
+  new File(path).writeAsString(data);
 }
 
 List<ClassDeclaration> getClasses(CompilationUnit code) {
@@ -71,7 +77,11 @@ String getFieldValue(FieldDeclaration field) {
 }
 
 String formatCode(String code) {
-  return new DartFormatter().format(code);
+  try {
+    return new DartFormatter().format(code);
+  } catch (e) {
+    return code;
+  }
 }
 
 String getTag(Declaration i) {
@@ -79,7 +89,7 @@ String getTag(Declaration i) {
 
   Annotation ann = i.metadata[0];
 
-  if (ann.name.toString() != 'Tag') return '';
+  if (ann.name.toString() != 'pragma') return '';
 
   SimpleStringLiteral val = ann.arguments.arguments[0];
 

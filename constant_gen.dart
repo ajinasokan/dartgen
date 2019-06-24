@@ -1,7 +1,9 @@
 import 'utils.dart';
 
 void main() {
-  var darts = listFiles('../constants');
+  var darts = listFiles('lib/constants');
+
+  if (darts.length == 0) return;
 
   String output = '''
   class Enumeration {
@@ -55,6 +57,6 @@ void main() {
   });
 
   output = formatCode(output);
-  saveFile('../constants/index.dart', output);
+  saveFile('lib/constants/index.dart', output);
   print("Constants.. Done.");
 }

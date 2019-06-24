@@ -2,7 +2,7 @@ import 'utils.dart';
 
 List<String> getConstants() {
   List<String> constants = [];
-  var darts = listFiles('../constants');
+  var darts = listFiles('lib/constants');
 
   darts.forEach((dartFile) {
     var code = readFile(dartFile);
@@ -16,7 +16,7 @@ List<String> getConstants() {
   return constants;
 }
 
-String serializerGen(List<ClassDeclaration> classElements) {
+String serializerGen(List<ClassDeclaration> classElements, String namespace) {
   var constants = getConstants();
   var output = new StringBuffer();
 
@@ -26,8 +26,8 @@ String serializerGen(List<ClassDeclaration> classElements) {
     if (classElement.typeParameters != null) {
       classNameWithT += classElement.typeParameters.toString();
     }
-    var extendsTo = classElement.extendsClause.superclass.name.name;
 
+    var extendsTo = "$namespace.$classNameWithT";
     output.writeln('class $classNameWithT extends $extendsTo {');
 
     List<ClassMember> fields = classElement.members;
@@ -52,8 +52,8 @@ String serializerGen(List<ClassDeclaration> classElements) {
       var type = field.fields.type.toString().replaceAll('\$', '');
       var name = field.fields.variables.first.name.name;
 
-      output.writeln('$type $name;');
-      constructor += 'this.$name,\n';
+      // output.writeln('$type $name;');
+      constructor += '$type $name,\n';
       clone += '$name: from.$name,';
 
       if (field.fields.variables.first.childEntities.length == 3) {
@@ -61,7 +61,7 @@ String serializerGen(List<ClassDeclaration> classElements) {
           initializer += 'if($name?.value == null) ';
         else
           initializer += 'if($name == null) ';
-        initializer += field.fields.variables.first.toString() + ';';
+        initializer += "this." + field.fields.variables.first.toString() + ';';
       }
 
       if (["String", "num", "bool", "int", "dynamic"].contains(type)) {
@@ -170,19 +170,26 @@ String serializerGen(List<ClassDeclaration> classElements) {
 }
 
 void main() {
-  var darts = listFiles('../models');
+  var darts = listFiles('lib/models');
+  if (darts.length == 0) return;
+
   String output = '';
 
-  output += "import 'package:kite/framework/model.dart';";
-  output += "import 'package:kite/constants/index.dart';";
-  output += "import 'package:kite/framework/http.dart' show Response;";
+  // output += "import 'package:kite/framework/model.dart';";
+  // output += "import 'package:kite/constants/index.dart';";
+  // output += "import 'package:kite/framework/http.dart' show Response;";
+  output += "import 'dart:convert';";
 
   darts.forEach((dartFile) {
     var code = readFile(dartFile);
-    output += serializerGen(getClasses(code));
+    if (code == null) return;
+
+    var namespace = fileName(dartFile).replaceFirst(".dart", "");
+    output += "import '$namespace.dart' as $namespace;";
+    output += serializerGen(getClasses(code), namespace);
   });
 
   output = formatCode(output);
-  saveFile('../models/index.dart', output);
+  saveFile('lib/models/index.dart', output);
   print("Models.. Done.");
 }
