@@ -27,8 +27,14 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       classNameWithT += classElement.typeParameters.toString();
     }
 
-    var extendsTo = "$namespace.$classNameWithT";
-    output.writeln('class $classNameWithT extends $extendsTo {');
+    var extendsTo = classElement.extendsClause?.superclass?.name?.name;
+    if (extendsTo == null)
+      output.writeln('class $classNameWithT {');
+    else
+      output.writeln('class $classNameWithT extends $extendsTo {');
+
+    // output
+    //     .writeln('class $classNameWithT extends $namespace.$classNameWithT {');
 
     List<ClassMember> fields = classElement.members;
     // classElement.members.where((i) => getTag(i).contains('json'));
@@ -38,6 +44,7 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
     String fromMap = '';
     String constructor = '';
     String initializer = '';
+    String patcher = '';
     String extraCode = '';
     String clone = '';
 
@@ -52,8 +59,8 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       var type = field.fields.type.toString().replaceAll('\$', '');
       var name = field.fields.variables.first.name.name;
 
-      // output.writeln('$type $name;');
-      constructor += '$type $name,\n';
+      output.writeln('$type $name;');
+      constructor += 'this.$name,\n';
       clone += '$name: from.$name,';
 
       if (field.fields.variables.first.childEntities.length == 3) {
@@ -61,7 +68,7 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
           initializer += 'if($name?.value == null) ';
         else
           initializer += 'if($name == null) ';
-        initializer += "this." + field.fields.variables.first.toString() + ';';
+        initializer += field.fields.variables.first.toString() + ';';
       }
 
       if (["String", "num", "bool", "int", "dynamic"].contains(type)) {
@@ -112,35 +119,45 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       if (["String", "num", "bool", "int"].contains(type)) {
         toMap += '"$key": $name,\n';
         fromMap += '$name: data["$key"],\n';
+        patcher += '$name = data["$key"];\n';
       } else if (type == 'double') {
         toMap += '"$key": $name,\n';
         fromMap += '$name: data["$key"] * 1.0,\n';
+        patcher += '$name = data["$key"] * 1.0;\n';
       } else if (type == 'Decimal') {
         toMap += '"$key": $name?.toDouble(),\n';
         fromMap += '$name: Decimal.parse(data["$key"].toString()),\n';
+        patcher += '$name = Decimal.parse(data["$key"].toString());\n';
       } else if (constants.contains(type)) {
         toMap += '"$key": $name?.value,\n';
         fromMap += '$name: $type(data["$key"]),\n';
+        patcher += '$name = $type(data["$key"]);\n';
       } else if (type == "Map<String, bool>" || type == "Map<String, String>") {
         var types = type.substring(4, type.indexOf(">")).split(",");
 
         toMap += '"$key": $name,\n';
         fromMap +=
             '$name: data["$key"].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]})),\n';
+        patcher +=
+            '$name = data["$key"].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}));\n';
       } else if (type.contains("List<")) {
         var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
 
         if (["String", "num", "bool"].contains(listPrimitive)) {
           toMap += '"$key": $name,\n';
           fromMap += '$name: (data["$key"] ?? []).cast<$listPrimitive>(),\n';
+          patcher += '$name = (data["$key"] ?? []).cast<$listPrimitive>();\n';
         } else {
           toMap += '"$key": $name.map((i) => i.toMap()).toList(),\n';
           fromMap +=
               '$name: (data["$key"] ?? []).map((i) => new $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>(),\n';
+          patcher +=
+              '$name = (data["$key"] ?? []).map((i) => new $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>();\n';
         }
       } else {
         toMap += '"$key": $name.toMap(),';
         fromMap += '$name: $type.fromMap(data["$key"]),\n';
+        patcher += '$name = $type.fromMap(data["$key"]);\n';
       }
     }
 
@@ -149,6 +166,12 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
     output.writeln('}){');
     output.writeln(initializer);
     output.writeln('}');
+
+    if (extendsTo == "Response") {
+      output.writeln('\nvoid parse() {\n var data = this.json(); \n');
+      output.write(patcher);
+      output.writeln('}');
+    }
 
     output.writeln('\nfactory $className.fromMap(Map data) => $className(');
     output.write(fromMap);
@@ -163,6 +186,7 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
     output.writeln(extraCode);
     output.writeln(
         'factory $className.fromJson(String data) => new $className.fromMap(json.decode(data));');
+
     output.writeln('}');
   }
 
@@ -179,13 +203,14 @@ void main() {
   // output += "import 'package:kite/constants/index.dart';";
   // output += "import 'package:kite/framework/http.dart' show Response;";
   output += "import 'dart:convert';";
+  output += "import '../app.dart';";
 
   darts.forEach((dartFile) {
     var code = readFile(dartFile);
     if (code == null) return;
 
     var namespace = fileName(dartFile).replaceFirst(".dart", "");
-    output += "import '$namespace.dart' as $namespace;";
+    // output += "import '$namespace.dart' as $namespace;";
     output += serializerGen(getClasses(code), namespace);
   });
 
