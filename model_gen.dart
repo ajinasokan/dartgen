@@ -119,19 +119,19 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       if (["String", "num", "bool", "int"].contains(type)) {
         toMap += '"$key": $name,\n';
         fromMap += '$name: data["$key"],\n';
-        patcher += '$name = data["$key"];\n';
+        patcher += '$name = _data["$key"];\n';
       } else if (type == 'double') {
         toMap += '"$key": $name,\n';
         fromMap += '$name: data["$key"] * 1.0,\n';
-        patcher += '$name = data["$key"] * 1.0;\n';
+        patcher += '$name = _data["$key"] * 1.0;\n';
       } else if (type == 'Decimal') {
         toMap += '"$key": $name?.toDouble(),\n';
         fromMap += '$name: Decimal.parse(data["$key"].toString()),\n';
-        patcher += '$name = Decimal.parse(data["$key"].toString());\n';
+        patcher += '$name = Decimal.parse(_data["$key"].toString());\n';
       } else if (constants.contains(type)) {
         toMap += '"$key": $name?.value,\n';
         fromMap += '$name: $type(data["$key"]),\n';
-        patcher += '$name = $type(data["$key"]);\n';
+        patcher += '$name = $type(_data["$key"]);\n';
       } else if (type == "Map<String, bool>" || type == "Map<String, String>") {
         var types = type.substring(4, type.indexOf(">")).split(",");
 
@@ -139,25 +139,25 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
         fromMap +=
             '$name: data["$key"].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]})),\n';
         patcher +=
-            '$name = data["$key"].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}));\n';
+            '$name = _data["$key"].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}));\n';
       } else if (type.contains("List<")) {
         var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
 
         if (["String", "num", "bool"].contains(listPrimitive)) {
           toMap += '"$key": $name,\n';
           fromMap += '$name: (data["$key"] ?? []).cast<$listPrimitive>(),\n';
-          patcher += '$name = (data["$key"] ?? []).cast<$listPrimitive>();\n';
+          patcher += '$name = (_data["$key"] ?? []).cast<$listPrimitive>();\n';
         } else {
           toMap += '"$key": $name.map((i) => i.toMap()).toList(),\n';
           fromMap +=
               '$name: (data["$key"] ?? []).map((i) => new $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>(),\n';
           patcher +=
-              '$name = (data["$key"] ?? []).map((i) => new $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>();\n';
+              '$name = (_data["$key"] ?? []).map((i) => new $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>();\n';
         }
       } else {
         toMap += '"$key": $name.toMap(),';
         fromMap += '$name: $type.fromMap(data["$key"]),\n';
-        patcher += '$name = $type.fromMap(data["$key"]);\n';
+        patcher += '$name = $type.fromMap(_data["$key"]);\n';
       }
     }
 
@@ -168,7 +168,7 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
     output.writeln('}');
 
     if (extendsTo == "Response") {
-      output.writeln('\nvoid parse() {\n var data = this.json(); \n');
+      output.writeln('\nvoid parse() {\n var _data = this.json(); \n');
       output.write(patcher);
       output.writeln('}');
     }
