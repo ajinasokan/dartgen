@@ -7,6 +7,6 @@ void generateIndex(String dir) {
   var exports = darts.map((i) => "export '$i';");
   String output = exports.join('\n');
   output = formatCode(output);
-  saveFile('lib/framework/index.dart', output);
+  saveFile(dir + '/index.dart', output);
   print("Done: $dir");
 }
