@@ -37,7 +37,7 @@ main(List<String> arguments) {
     }
 
     if (event.path.startsWith("lib/framework")) {
-      dartgen.generateIndex("lib/screens");
+      dartgen.generateIndex("lib/framework");
     }
   });
 }
