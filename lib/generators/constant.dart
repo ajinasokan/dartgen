@@ -37,20 +37,30 @@ void generateConstant(String dir) {
           const $enumName(value) : super(value);
           
       ''';
+
+      String extraCode = '';
+
       classItem.members.forEach((field) {
-        var constant = getFieldName(field);
-        var value = getFieldValue(field);
+        if (field is FieldDeclaration && field.fields.isConst) {
+          var constant = getFieldName(field);
+          var value = getFieldValue(field);
 
-        output += 'static const $constant = const $enumName($value);';
+          output += 'static const $constant = const $enumName($value);';
 
-        items.add(constant);
-        keys.add('"' + constant + '"');
-        values.add(value);
+          items.add(constant);
+          keys.add('"' + constant + '"');
+          values.add(value);
+        } else {
+          extraCode += '\n' + field.toString();
+          return;
+        }
       });
 
       output += 'static const List<String> keys = [${keys.join(",")}];';
       output += 'static const List<String> values = [${values.join(",")}];';
       output += 'static const List<$enumName> items = [${items.join(",")}];';
+
+      output += extraCode;
 
       output += '}';
     });
