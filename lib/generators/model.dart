@@ -145,7 +145,7 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       } else if (type.contains("List<")) {
         var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
 
-        if (["String", "num", "bool"].contains(listPrimitive)) {
+        if (["String", "num", "bool", "dynamic"].contains(listPrimitive)) {
           toMap += '"$key": $name,\n';
           fromMap += '$name: (data["$key"] ?? []).cast<$listPrimitive>(),\n';
           patcher += '$name = (_data["$key"] ?? []).cast<$listPrimitive>();\n';
