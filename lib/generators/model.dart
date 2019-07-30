@@ -118,7 +118,7 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
 
       var key = getTag(field).split(':')[1].replaceAll('"', '');
 
-      if (["String", "num", "bool", "int"].contains(type)) {
+      if (["String", "num", "bool", "int", "dynamic"].contains(type)) {
         toMap += '"$key": $name,\n';
         fromMap += '$name: data["$key"],\n';
         patcher += '$name = _data["$key"];\n';
