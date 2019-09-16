@@ -81,14 +81,14 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       } else if (constants.contains(type)) {
         serialize += '"$name": $name?.value,';
       } else if (type.contains("Map<")) {
-        var types = type.substring(4, type.indexOf(">")).split(",");
+        var types = type.substring(4, type.lastIndexOf(">")).split(",");
 
         var type1 = ".serialize()";
         var type2 = ".serialize()";
 
-        if (["String", "num", "bool", "int", "dynamic"]
+        if (["String", "num", "bool", "int", "dynamic", "List<dynamic>"]
             .contains(types[0].trim())) type1 = "";
-        if (["String", "num", "bool", "int", "dynamic"]
+        if (["String", "num", "bool", "int", "dynamic", "List<dynamic>"]
             .contains(types[1].trim())) type2 = "";
 
         if (type1 == "" && type2 == "") {
@@ -134,8 +134,8 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
         toMap += '"$key": $name?.value,\n';
         fromMap += '$name: $type(data["$key"]),\n';
         patcher += '$name = $type(_data["$key"]);\n';
-      } else if (type == "Map<String, bool>" || type == "Map<String, String>") {
-        var types = type.substring(4, type.indexOf(">")).split(",");
+      } else if (type.contains("Map<")) {
+        var types = type.substring(4, type.lastIndexOf(">")).split(",");
 
         toMap += '"$key": $name,\n';
         fromMap +=
