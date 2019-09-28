@@ -183,9 +183,10 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       output.writeln('}');
     }
 
-    output.writeln('\nfactory $className.fromMap(Map data) => $className(');
+    output.writeln(
+        '\nfactory $className.fromMap(Map data) { if(data == null) return null; return $className(');
     output.write(fromMap);
-    output.writeln(');');
+    output.writeln('); }');
     output.writeln('\nMap<String, dynamic> toMap() {return {');
     output.write(toMap);
     output.writeln('};}');
