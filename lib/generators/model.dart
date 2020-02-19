@@ -83,8 +83,8 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       } else if (type.contains("Map<")) {
         var types = type.substring(4, type.lastIndexOf(">")).split(",");
 
-        var type1 = ".serialize()";
-        var type2 = ".serialize()";
+        var type1 = "?.serialize()";
+        var type2 = "?.serialize()";
 
         if (["String", "num", "bool", "int", "dynamic", "List<dynamic>"]
             .contains(types[0].trim())) type1 = "";
@@ -108,10 +108,10 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
           serialize += '"$name": $name.map((dynamic i) => i?.value).toList(),';
         } else {
           serialize +=
-              '"$name": $name.map((dynamic i) => i.serialize()).toList(),';
+              '"$name": $name.map((dynamic i) => i?.serialize()).toList(),';
         }
       } else {
-        serialize += '"$name": $name.serialize(),';
+        serialize += '"$name": $name?.serialize(),';
       }
 
       if (!getTag(field).contains('json')) continue;
