@@ -102,7 +102,7 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       } else if (type.contains("List<")) {
         var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
 
-        if (["String", "num", "bool"].contains(listPrimitive)) {
+        if (["String", "num", "bool", "dynamic"].contains(listPrimitive)) {
           serialize += '"$name": $name,';
         } else if (constants.contains(listPrimitive)) {
           serialize += '"$name": $name.map((dynamic i) => i?.value).toList(),';
