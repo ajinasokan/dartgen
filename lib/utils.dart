@@ -26,7 +26,7 @@ List<String> listFiles(String path) {
       }
     }
   } catch (e) {}
-
+  files.sort();
   return files;
 }
 
