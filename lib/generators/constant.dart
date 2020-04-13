@@ -1,72 +1,78 @@
 import '../utils.dart';
+import '../code_replacer.dart';
+
+Map<String, int> _lastModified = {};
 
 void generateConstant(String dir) {
   var darts = listFiles(dir);
-
-  if (darts.length == 0) return;
-
-  String output = '''
-  class Enumeration {
-    final String value;
-    const Enumeration(this.value);
-  
-    operator ==(Object other) =>
-        other is Enumeration ? value == other.value : false;
-  
-    @override
-    int get hashCode => value.hashCode;
-  
-    operator +(Enumeration other) => value + other.value;
-  
-    @override
-    String toString() => value;
-  }
-  ''';
+  if (darts.isEmpty) return;
 
   darts.forEach((dartFile) {
+    _lastModified[dartFile] ??= 0;
+    if (lastModTime(dartFile) <= _lastModified[dartFile]) {
+      return;
+    }
+    var replacer = CodeReplacer(fileContents(dartFile));
     var code = readFile(dartFile);
 
     getClasses(code).forEach((classItem) {
       var enumName = getClassName(classItem);
-      List<String> keys = [];
-      List<String> values = [];
-      List<String> items = [];
+      var meta = getTag(classItem);
+      if (meta != 'enum') return;
 
-      output += '''
-        class $enumName extends Enumeration { 
-          const $enumName(value) : super(value);
-          
-      ''';
+      var keys = <String>[];
+      var values = <String>[];
+      var items = <String>[];
 
-      String extraCode = '';
-
+      var methodsToDelete = <String>['==', '+', 'toString', 'hashCode'];
+      var fieldsToDelete = <String>['value', 'keys', 'values', 'items'];
       classItem.members.forEach((field) {
-        if (field is FieldDeclaration && field.fields.isConst) {
+        if (field is ConstructorDeclaration) {
+          replacer.space(field.offset, field.length);
+        } else if (field is FieldDeclaration &&
+            fieldsToDelete.contains(getFieldName(field))) {
+          replacer.space(field.offset, field.length);
+        } else if (field is MethodDeclaration &&
+            methodsToDelete.contains(getMethodName(field))) {
+          replacer.space(field.offset, field.length);
+        } else if (field is FieldDeclaration && field.fields.isConst) {
           var constant = getFieldName(field);
-          var value = getFieldValue(field);
-
-          output += 'static const $constant = const $enumName($value);';
+          var value = getConstructorInput(field);
 
           items.add(constant);
-          keys.add('"' + constant + '"');
-          values.add(value);
-        } else {
-          extraCode += '\n' + field.toString();
-          return;
+          keys.add("'" + constant + "'");
+          values.add("'" + value + "'");
         }
       });
 
-      output += 'static const List<String> keys = [${keys.join(",")}];';
-      output += 'static const List<String> values = [${values.join(",")}];';
-      output += 'static const List<$enumName> items = [${items.join(",")}];';
+      var template = '''
+static const keys = <String>[${keys.join(",")}];
+static const values = <String>[${values.join(",")}];
+static const items = <$enumName>[${items.join(",")}];
 
-      output += extraCode;
+final String value;
+const $enumName(this.value);
 
-      output += '}';
+@override
+bool operator ==(Object o) => o is $enumName && value == o.value;
+
+@override
+int get hashCode => value.hashCode;
+
+$enumName operator +($enumName o) => $enumName(value + o.value);
+
+@override
+String toString() => value;
+  ''';
+
+      replacer.add(classItem.offset + classItem.length - 1, 0, template);
     });
+
+    var output = formatCode(replacer.process());
+    saveFile(dartFile, output);
+
+    _lastModified[dartFile] = lastModTime(dartFile);
   });
 
-  output = formatCode(output);
-  saveFile('lib/constants/index.dart', output);
-  print("Done: $dir");
+  print('Done: $dir');
 }

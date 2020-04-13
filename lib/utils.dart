@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:glob/glob.dart';
 import 'package:analyzer/analyzer.dart';
 import 'package:dart_style/dart_style.dart';
+import 'package:dart_style/src/source_visitor.dart';
 
 export 'package:analyzer/analyzer.dart';
 
@@ -34,9 +35,25 @@ String fileName(String path) {
   return basename(path);
 }
 
+String fileContents(String path) {
+  return File(path).readAsStringSync();
+}
+
+int lastModTime(String path) {
+  return File(path).lastModifiedSync().millisecondsSinceEpoch;
+}
+
 CompilationUnit readFile(String path) {
   try {
     return parseDartFile(path);
+  } catch (e) {
+    return null;
+  }
+}
+
+CompilationUnit readString(String code) {
+  try {
+    return parseCompilationUnit(code);
   } catch (e) {
     return null;
   }
@@ -64,6 +81,10 @@ String getClassName(ClassDeclaration classdec) {
   return classdec.name.name;
 }
 
+String getMethodName(MethodDeclaration field) {
+  return field.name.name;
+}
+
 String getFieldName(FieldDeclaration field) {
   return field.fields.variables.first.name.name;
 }
@@ -76,13 +97,22 @@ String getFieldValue(FieldDeclaration field) {
   return field.fields.variables.first.initializer.toString();
 }
 
-String formatCode(String code) {
-  try {
-    return new DartFormatter().format(code);
-  } catch (e) {
-    return code;
-  }
+String getConstructorInput(FieldDeclaration field) {
+  var mi = field.fields.variables.first.initializer as MethodInvocation;
+  var val = mi.argumentList.arguments.first as SimpleStringLiteral;
+  return val.stringValue;
 }
+
+String formatCode(String code) {
+  return DartFormatter().format(code);
+}
+
+// String formatUnit(CompilationUnit unit) {
+//   var source = SourceCode(source, uri: uri, isCompilationUnit: true);
+//   var visitor = SourceVisitor(this, lineInfo, source);
+//   var output = visitor.run(unit);
+//   return output.text;
+// }
 
 String getTag(Declaration i) {
   if (i.metadata.length == 0) return '';
