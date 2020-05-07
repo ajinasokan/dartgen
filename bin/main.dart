@@ -1,48 +1,73 @@
+import 'dart:io';
 import 'package:watcher/watcher.dart';
 import 'package:dartgen/dartgen.dart' as dartgen;
+import 'package:dartgen/models/index.dart';
 
-main(List<String> arguments) {
-  dartgen.generateModel("lib/models");
-  dartgen.generateConstant("lib/constants");
-  dartgen.generateIndex("lib/component");
-  dartgen.generateIndex("lib/mutations");
-  dartgen.generateIndex("lib/screens");
-  dartgen.generateIndex("lib/framework");
-  dartgen.generateIndex("lib/utils");
+void main(List<String> arguments) {
+  final configFile = File("dartgen.json");
+  Config config;
+  if (configFile.existsSync()) {
+    config = Config.fromJson(configFile.readAsStringSync());
+  } else {
+    config = Config(
+      dir: "lib",
+      generators: [
+        Generator(dir: "lib/models", type: "model"),
+        Generator(dir: "lib/constants", type: "constant"),
+        Generator(dir: "lib/component", type: "index"),
+        Generator(dir: "lib/mutations", type: "index"),
+        Generator(dir: "lib/screens", type: "index"),
+        Generator(dir: "lib/framework", type: "index"),
+        Generator(dir: "lib/utils", type: "index"),
+      ],
+    );
+  }
 
-  var watcher = DirectoryWatcher("lib");
+  config.generators.forEach((g) {
+    switch (g.type) {
+      case "model":
+        dartgen.generateModel(g.dir);
+        break;
+      case "constant":
+        dartgen.generateConstant(g.dir);
+        break;
+      case "index":
+        dartgen.generateIndex(g.dir);
+        break;
+      default:
+    }
+  });
+
+  var watcher = DirectoryWatcher(config.dir);
+
   print("Watching changes..");
+
   watcher.events.listen((event) {
     if (event.path.endsWith("index.dart")) return;
 
     print(event);
 
-    if (event.path.startsWith("lib/models")) {
-      dartgen.generateModel("lib/models");
-    }
-
-    if (event.path.startsWith("lib/constants")) {
-      dartgen.generateConstant("lib/constants");
-    }
-
-    if (event.path.startsWith("lib/component")) {
-      dartgen.generateIndex("lib/component");
-    }
-
-    if (event.path.startsWith("lib/mutations")) {
-      dartgen.generateIndex("lib/mutations");
-    }
-
-    if (event.path.startsWith("lib/screens")) {
-      dartgen.generateIndex("lib/screens");
-    }
-
-    if (event.path.startsWith("lib/framework")) {
-      dartgen.generateIndex("lib/framework");
-    }
-
-    if (event.path.startsWith("lib/utils")) {
-      dartgen.generateIndex("lib/utils");
-    }
+    config.generators.forEach((g) {
+      if (!event.path.startsWith(g.dir)) {
+        return;
+      }
+      try {
+        switch (g.type) {
+          case "model":
+            dartgen.generateModel(g.dir);
+            break;
+          case "constant":
+            dartgen.generateConstant(g.dir);
+            break;
+          case "index":
+            dartgen.generateIndex(g.dir);
+            break;
+          default:
+        }
+      } catch (e, s) {
+        print(e);
+        print(s);
+      }
+    });
   });
 }
