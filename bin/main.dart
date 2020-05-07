@@ -8,6 +8,7 @@ main(List<String> arguments) {
   dartgen.generateIndex("lib/mutations");
   dartgen.generateIndex("lib/screens");
   dartgen.generateIndex("lib/framework");
+  dartgen.generateIndex("lib/utils");
 
   var watcher = DirectoryWatcher("lib");
   print("Watching changes..");
@@ -38,6 +39,10 @@ main(List<String> arguments) {
 
     if (event.path.startsWith("lib/framework")) {
       dartgen.generateIndex("lib/framework");
+    }
+
+    if (event.path.startsWith("lib/utils")) {
+      dartgen.generateIndex("lib/utils");
     }
   });
 }

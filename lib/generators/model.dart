@@ -153,10 +153,17 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
       } else if (type.contains("List<")) {
         var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
 
-        if (["String", "num", "bool", "dynamic"].contains(listPrimitive)) {
+        if (["String", "int", "double", "num", "bool", "dynamic"]
+            .contains(listPrimitive)) {
           toMap += '"$key": $name,\n';
           fromMap += '$name: (data["$key"] ?? []).cast<$listPrimitive>(),\n';
           patcher += '$name = (_data["$key"] ?? []).cast<$listPrimitive>();\n';
+        } else if (constants.contains(listPrimitive)) {
+          toMap += '"$key": $name.map((i) => i.value).toList(),\n';
+          fromMap +=
+              '$name: (data["$key"] ?? []).map((i) => new $listPrimitive(i)).toList().cast<$listPrimitive>(),\n';
+          patcher +=
+              '$name = (_data["$key"] ?? []).map((i) => new $listPrimitive(i)).toList().cast<$listPrimitive>();\n';
         } else {
           toMap += '"$key": $name.map((i) => i.toMap()).toList(),\n';
           fromMap +=
