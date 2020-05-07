@@ -152,12 +152,22 @@ String serializerGen(List<ClassDeclaration> classElements, String namespace) {
             '$name = _data["$key"].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}));\n';
       } else if (type.contains("List<")) {
         var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
-
-        if (["String", "int", "double", "num", "bool", "dynamic"]
-            .contains(listPrimitive)) {
+        if (["String", "num", "bool", "dynamic"].contains(listPrimitive)) {
           toMap += '"$key": $name,\n';
           fromMap += '$name: (data["$key"] ?? []).cast<$listPrimitive>(),\n';
           patcher += '$name = (_data["$key"] ?? []).cast<$listPrimitive>();\n';
+        } else if (listPrimitive == "int") {
+          toMap += '"$key": $name,\n';
+          fromMap +=
+              '$name: (data["$key"] ?? []).map((i) => i ~/ 1).toList().cast<int>(),\n';
+          patcher +=
+              '$name = (_data["$key"] ?? []).map((i) => i ~/ 1).toList().cast<int>();\n';
+        } else if (listPrimitive == "double") {
+          toMap += '"$key": $name,\n';
+          fromMap +=
+              '$name: (data["$key"] ?? []).map((i) => i * 1.0).toList().cast<double>(),\n';
+          patcher +=
+              '$name = (_data["$key"] ?? []).map((i) => i * 1.0).toList().cast<double>();\n';
         } else if (constants.contains(listPrimitive)) {
           toMap += '"$key": $name.map((i) => i.value).toList(),\n';
           fromMap +=
