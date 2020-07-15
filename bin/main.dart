@@ -4,35 +4,36 @@ import 'package:dartgen/dartgen.dart' as dartgen;
 import 'package:dartgen/models/index.dart';
 
 void main(List<String> arguments) {
-  final configFile = File("dartgen.json");
+  final configFile = File('dartgen.json');
   Config config;
   if (configFile.existsSync()) {
     config = Config.fromJson(configFile.readAsStringSync());
   } else {
     config = Config(
-      dir: "lib",
+      dir: 'lib',
       generators: [
-        Generator(dir: "lib/models", type: "model"),
-        Generator(dir: "lib/constants", type: "constant"),
-        Generator(dir: "lib/component", type: "index"),
-        Generator(dir: "lib/mutations", type: "index"),
-        Generator(dir: "lib/screens", type: "index"),
-        Generator(dir: "lib/framework", type: "index"),
-        Generator(dir: "lib/utils", type: "index"),
+        Generator(dir: 'lib/models', type: 'model'),
+        Generator(dir: 'lib/constants', type: 'constant'),
+        Generator(dir: 'lib/component', type: 'index'),
+        Generator(dir: 'lib/mutations', type: 'index'),
+        Generator(dir: 'lib/screens', type: 'index'),
+        Generator(dir: 'lib/framework', type: 'index'),
+        Generator(dir: 'lib/utils', type: 'index'),
       ],
     );
+    print(config.toJson());
   }
 
   config.generators.forEach((g) {
     switch (g.type) {
-      case "model":
-        dartgen.generateModel(g.dir);
+      case 'model':
+        dartgen.generateModelDir(g.dir, g.recursive);
         break;
-      case "constant":
-        dartgen.generateConstant(g.dir);
+      case 'constant':
+        dartgen.generateConstantDir(g.dir, g.recursive);
         break;
-      case "index":
-        dartgen.generateIndex(g.dir);
+      case 'index':
+        dartgen.generateIndex(g.dir, g.recursive);
         break;
       default:
     }
@@ -40,10 +41,15 @@ void main(List<String> arguments) {
 
   var watcher = DirectoryWatcher(config.dir);
 
-  print("Watching changes..");
+  print('Watching changes..');
 
+  String lastFile;
   watcher.events.listen((event) {
-    if (event.path.endsWith("index.dart")) return;
+    if (event.path.endsWith('index.dart')) return;
+    if (event.path == lastFile) {
+      lastFile = null;
+      return;
+    }
 
     print(event);
 
@@ -53,14 +59,18 @@ void main(List<String> arguments) {
       }
       try {
         switch (g.type) {
-          case "model":
-            dartgen.generateModel(g.dir);
+          case 'model':
+            if (event.type != ChangeType.REMOVE) {
+              dartgen.generateModel(event.path);
+            }
             break;
-          case "constant":
-            dartgen.generateConstant(g.dir);
+          case 'constant':
+            if (event.type != ChangeType.REMOVE) {
+              dartgen.generateConstant(event.path);
+            }
             break;
-          case "index":
-            dartgen.generateIndex(g.dir);
+          case 'index':
+            dartgen.generateIndex(g.dir, g.recursive);
             break;
           default:
         }
@@ -69,5 +79,7 @@ void main(List<String> arguments) {
         print(s);
       }
     });
+
+    lastFile = event.path;
   });
 }

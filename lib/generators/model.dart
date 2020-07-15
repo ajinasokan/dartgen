@@ -1,3 +1,5 @@
+import 'package:dartgen/dartgen.dart';
+
 import '../utils.dart';
 import '../code_replacer.dart';
 
@@ -21,6 +23,15 @@ List<String> getConstants() {
 
 void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
     String namespace) {
+  final primitives = <String>[
+    "String",
+    "num",
+    "double",
+    "bool",
+    "int",
+    "dynamic"
+  ];
+
   var constants = getConstants();
 
   for (ClassDeclaration classElement in classElements) {
@@ -56,7 +67,13 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
 
     var output = StringBuffer();
 
-    var methodsToDelete = <String>['toMap', 'toJson', 'serialize'];
+    var methodsToDelete = <String>[
+      'toMap',
+      'toJson',
+      'serialize',
+      'patch',
+      'init'
+    ];
     var fieldsToDelete = <String>[];
     for (ClassMember member in fields) {
       if (member is ConstructorDeclaration) {
@@ -89,8 +106,10 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
           initializer += field.fields.variables.first.toString() + ';';
         }
 
-        if (["String", "num", "bool", "int", "dynamic"].contains(type)) {
+        if (primitives.contains(type)) {
           serialize += '"$name": $name,';
+        } else if (type == 'Type') {
+          serialize += '"$name": "Type<$name>",';
         } else if (type == 'double') {
           serialize += '"$name": $name,';
         } else if (type == 'Decimal') {
@@ -98,15 +117,33 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
         } else if (constants.contains(type)) {
           serialize += '"$name": $name?.value,';
         } else if (type.contains("Map<")) {
-          var types = type.substring(4, type.lastIndexOf(">")).split(",");
+          var types = type
+              .substring(4, type.lastIndexOf(">"))
+              .split(",")
+              .map((e) => e.trim())
+              .toList();
 
           var type1 = "?.serialize()";
           var type2 = "?.serialize()";
 
-          if (["String", "num", "bool", "int", "dynamic", "List<dynamic>"]
-              .contains(types[0].trim())) type1 = "";
-          if (["String", "num", "bool", "int", "dynamic", "List<dynamic>"]
-              .contains(types[1].trim())) type2 = "";
+          if (primitives.contains(types[0].trim())) type1 = "";
+          if (primitives.contains(types[1].trim())) type2 = "";
+
+          if (types[0].startsWith("List<")) {
+            var listPrimitive =
+                types[0].replaceAll('List<', '').replaceAll('>', '');
+            if (primitives.contains(listPrimitive)) {
+              type1 = "";
+            }
+          }
+
+          if (types[1].startsWith("List<")) {
+            var listPrimitive =
+                types[1].replaceAll('List<', '').replaceAll('>', '');
+            if (primitives.contains(listPrimitive)) {
+              type2 = "";
+            }
+          }
 
           if (type1 == "" && type2 == "") {
             serialize += '"$name": $name,';
@@ -119,7 +156,7 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
         } else if (type.contains("List<")) {
           var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
 
-          if (["String", "num", "bool", "dynamic"].contains(listPrimitive)) {
+          if (primitives.contains(listPrimitive)) {
             serialize += '"$name": $name,';
           } else if (constants.contains(listPrimitive)) {
             serialize +=
@@ -211,27 +248,29 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
     if (constructor.isNotEmpty) {
       output.writeln('\n$className({');
       output.write(constructor);
+      output.writeln('})');
       if (initializer.isNotEmpty) {
-        output.writeln('}){');
+        output.writeln('{ init(); }\n');
+        output.writeln('void init() {');
         output.writeln(initializer);
         output.writeln('}');
       } else {
-        output.writeln('});');
+        output.writeln(';');
       }
     } else {
       output.writeln('\n$className();');
     }
 
-    if (extendsTo == "Response") {
-      output.writeln('\nvoid parse() {\n var _data = this.json(); \n');
-      output.write(patcher);
-      output.writeln('}');
+    output.writeln('\nvoid patch(Map _data) { if(_data == null) return null;');
+    output.write(patcher);
+    if (initializer.isNotEmpty) {
+      output.writeln('init();');
     }
+    output.writeln('}');
 
     output.writeln(
-        '\nfactory $className.fromMap(Map data) { if(data == null) return null; return $className(');
-    output.write(fromMap);
-    output.writeln('); }');
+        '\nfactory $className.fromMap(Map data) { if(data == null) return null; return $className()..patch(data); }');
+
     output.writeln('\nMap<String, dynamic> toMap() => {');
     output.write(toMap);
     output.writeln('};');
@@ -250,29 +289,31 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
   }
 }
 
-void generateModel(String dir) {
-  var darts = listFiles(dir);
-  if (darts.length == 0) return;
+void generateModelDir(String dir, bool recursive) {
+  var darts = listFiles(dir, recursive);
+  if (darts.isEmpty) return;
 
-  darts.forEach((dartFile) {
-    _lastModified[dartFile] ??= 0;
-    if (lastModTime(dartFile) <= _lastModified[dartFile]) {
-      return;
-    }
-    print(dartFile);
-    var replacer = CodeReplacer(fileContents(dartFile));
+  darts.forEach((dartFile) => generateModel(dartFile));
 
-    var code = readFile(dartFile);
-    if (code == null) return;
+  print('Done: $dir');
+}
 
-    var namespace = fileName(dartFile).replaceFirst(".dart", "");
-    serializerGen(replacer, getClasses(code), namespace);
+void generateModel(String dartFile) {
+  _lastModified[dartFile] ??= 0;
+  if (lastModTime(dartFile) <= _lastModified[dartFile]) {
+    return;
+  }
+  print('Processing $dartFile');
+  var replacer = CodeReplacer(fileContents(dartFile));
 
-    var output = formatCode(replacer.process());
-    saveFile(dartFile, output);
+  var code = readFile(dartFile);
+  if (code == null) return;
 
-    _lastModified[dartFile] = lastModTime(dartFile);
-  });
+  var namespace = fileName(dartFile).replaceFirst(".dart", "");
+  serializerGen(replacer, getClasses(code), namespace);
 
-  print("Done: $dir");
+  var output = formatCode(replacer.process());
+  saveFile(dartFile, output);
+
+  _lastModified[dartFile] = lastModTime(dartFile);
 }

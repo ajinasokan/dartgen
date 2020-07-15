@@ -11,14 +11,14 @@ export 'package:analyzer/analyzer.dart';
 //   return normalize(dirname(Platform.script.toFilePath()) + '/' + path);
 // }
 
-List<String> listFiles(String path) {
+List<String> listFiles(String path, [bool recursive = false]) {
   List<String> files = [];
   try {
     var dir = new Directory(path);
 
     final dartFile = new Glob("**.dart");
 
-    List contents = dir.listSync();
+    List contents = dir.listSync(recursive: recursive);
 
     for (var fileOrDir in contents) {
       if (dartFile.matches(fileOrDir.path) &&
@@ -29,6 +29,10 @@ List<String> listFiles(String path) {
   } catch (e) {}
   files.sort();
   return files;
+}
+
+String relativePath(String path, String from) {
+  return relative(path, from: from);
 }
 
 String fileName(String path) {
