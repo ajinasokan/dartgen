@@ -225,20 +225,20 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
             patcher +=
                 '$name = (_data["$key"] ?? []).map((i) => i * 1.0).toList().cast<double>();\n';
           } else if (constants.contains(listPrimitive)) {
-            toMap += '"$key": $name.map((i) => i.value).toList(),\n';
+            toMap += '"$key": $name?.map((i) => i.value)?.toList(),\n';
             fromMap +=
                 '$name: (data["$key"] ?? []).map((i) => new $listPrimitive(i)).toList().cast<$listPrimitive>(),\n';
             patcher +=
                 '$name = (_data["$key"] ?? []).map((i) => new $listPrimitive(i)).toList().cast<$listPrimitive>();\n';
           } else {
-            toMap += '"$key": $name.map((i) => i.toMap()).toList(),\n';
+            toMap += '"$key": $name?.map((i) => i.toMap())?.toList(),\n';
             fromMap +=
                 '$name: (data["$key"] ?? []).map((i) => $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>(),\n';
             patcher +=
                 '$name = (_data["$key"] ?? []).map((i) => $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>();\n';
           }
         } else {
-          toMap += '"$key": $name.toMap(),';
+          toMap += '"$key": $name?.toMap(),';
           fromMap += '$name: $type.fromMap(data["$key"]),\n';
           patcher += '$name = $type.fromMap(_data["$key"]);\n';
         }
