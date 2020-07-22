@@ -37,6 +37,7 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
   for (ClassDeclaration classElement in classElements) {
     var meta = getTag(classElement);
     if (meta != 'model') return;
+    var metaArgs = getTagArgs(classElement);
 
     var className = classElement.name.name.replaceAll('_', '');
     var classNameWithT = className;
@@ -64,6 +65,7 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
     String patcher = '';
     String extraCode = '';
     String clone = '';
+    String patchWith = '';
 
     var output = StringBuffer();
 
@@ -72,7 +74,8 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
       'toJson',
       'serialize',
       'patch',
-      'init'
+      'patchWith',
+      'init',
     ];
     var fieldsToDelete = <String>[];
     for (ClassMember member in fields) {
@@ -96,6 +99,7 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
         // output.writeln('$type $name;');
         constructor += 'this.$name,\n';
         clone += '$name: from.$name,';
+        patchWith += '$name = clone.$name;\n';
 
         if (field.fields.variables.first.childEntities.length == 3) {
           if (constants.contains(type)) {
@@ -276,6 +280,8 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
     output.writeln('};');
     output.writeln('String toJson() => json.encode(toMap());');
     output.writeln('Map<String, dynamic> serialize() => {$serialize};');
+    if (metaArgs == "patchWith")
+      output.writeln('\nvoid patchWith($className clone) { $patchWith }');
     output.writeln(
         '\nfactory $className.clone($className from) => $className($clone);');
     output.writeln(extraCode);
@@ -312,8 +318,13 @@ void generateModel(String dartFile) {
   var namespace = fileName(dartFile).replaceFirst(".dart", "");
   serializerGen(replacer, getClasses(code), namespace);
 
-  var output = formatCode(replacer.process());
-  saveFile(dartFile, output);
+  try {
+    var output = formatCode(replacer.process());
+    saveFile(dartFile, output);
+  } catch (e) {
+    print(e);
+    return;
+  }
 
   _lastModified[dartFile] = lastModTime(dartFile);
 }

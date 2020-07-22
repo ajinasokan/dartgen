@@ -129,3 +129,17 @@ String getTag(Declaration i) {
 
   return val.value;
 }
+
+String getTagArgs(Declaration i) {
+  if (i.metadata.length == 0) return '';
+
+  Annotation ann = i.metadata[0];
+
+  if (ann.name.toString() != 'pragma') return '';
+
+  if (ann.arguments.arguments.length < 2) return '';
+
+  SimpleStringLiteral val = ann.arguments.arguments[1];
+
+  return val.value;
+}
