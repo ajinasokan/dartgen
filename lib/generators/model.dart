@@ -62,7 +62,8 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
     String fromMap = '';
     String constructor = '';
     String initializer = '';
-    String patcher = '';
+    String patcher =
+        'final toDouble = (val) => val == null ? null : val * 1.0;\nfinal toDecimal = (val) => val == null ? null : Decimal.parse(val.toString());\n';
     String extraCode = '';
     String clone = '';
     String patchWith = '';
@@ -192,11 +193,11 @@ void serializerGen(CodeReplacer replacer, List<ClassDeclaration> classElements,
         } else if (type == 'double') {
           toMap += '"$key": $name,\n';
           fromMap += '$name: data["$key"] * 1.0,\n';
-          patcher += '$name = _data["$key"] * 1.0;\n';
+          patcher += '$name = toDouble(_data["$key"]);\n';
         } else if (type == 'Decimal') {
           toMap += '"$key": $name?.toDouble(),\n';
           fromMap += '$name: Decimal.parse(data["$key"].toString()),\n';
-          patcher += '$name = Decimal.parse(_data["$key"].toString());\n';
+          patcher += '$name = toDecimal(_data["$key"]);\n';
         } else if (constants.contains(type)) {
           toMap += '"$key": $name?.value,\n';
           fromMap += '$name: $type(data["$key"]),\n';
