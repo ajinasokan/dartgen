@@ -18,6 +18,9 @@ void main(List<String> arguments) {
   final modelGen = ModelGenerator(enumGenerator: enumGen);
   final indexGen = IndexGenerator();
 
+  // generate constants first so that models can make use of it
+  config.generators.sort((a, b) => a.type == 'constant' ? -1 : 1);
+
   config.generators.forEach((g) {
     switch (g.type) {
       case 'model':
@@ -27,6 +30,7 @@ void main(List<String> arguments) {
         incrementalProcess(g.dir, g.recursive, enumGen.process);
         break;
       case 'index':
+        print('Processing index of ${g.dir}');
         var darts = listFiles(g.dir, g.recursive);
         indexGen.process(darts);
         break;
@@ -40,7 +44,10 @@ void main(List<String> arguments) {
 
   String lastFile;
   watcher.events.listen((event) {
+    // TODO: replace this with output file name from config
     if (event.path.endsWith('index.dart')) return;
+
+    // dont generate for the file that was the output of last run
     if (event.path == lastFile) {
       lastFile = null;
       return;

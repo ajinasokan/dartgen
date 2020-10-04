@@ -11,6 +11,8 @@ class ModelGenerator extends FileGenerator {
 
   @override
   String process(String dartFile) {
+    print('Processing $dartFile');
+
     var replacer = CodeReplacer(fileContents(dartFile));
 
     var code = readFile(dartFile);
