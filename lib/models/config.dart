@@ -7,7 +7,7 @@ class Config {
   String dir;
 
   @pragma('json:generators')
-  List<Generator> generators = [];
+  List<GeneratorConfig> generators = [];
 
   Config({
     this.dir,
@@ -24,9 +24,9 @@ class Config {
     if (_data == null) return null;
     dir = _data["dir"];
     generators = (_data["generators"] ?? [])
-        .map((i) => Generator.fromMap(i))
+        .map((i) => GeneratorConfig.fromMap(i))
         .toList()
-        .cast<Generator>();
+        .cast<GeneratorConfig>();
     init();
   }
 

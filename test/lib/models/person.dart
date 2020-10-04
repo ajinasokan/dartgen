@@ -18,19 +18,22 @@ class Person {
     this.address,
   });
 
+  void patch(Map _data) {
+    if (_data == null) return null;
+    name = _data["name"];
+    age = _data["int"];
+    address = Address.fromMap(_data["address"]);
+  }
+
   factory Person.fromMap(Map data) {
     if (data == null) return null;
-    return Person(
-      name: data["name"],
-      age: data["int"],
-      address: Address.fromMap(data["address"]),
-    );
+    return Person()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {
         "name": name,
         "int": age,
-        "address": address.toMap(),
+        "address": address?.toMap(),
       };
   String toJson() => json.encode(toMap());
   Map<String, dynamic> serialize() => {

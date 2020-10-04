@@ -1,39 +1,34 @@
 import 'dart:io';
 import 'package:watcher/watcher.dart';
-import 'package:dartgen/dartgen.dart' as dartgen;
+import 'package:dartgen/dartgen.dart';
 import 'package:dartgen/models/index.dart';
 
 void main(List<String> arguments) {
   final configFile = File('dartgen.json');
+
   Config config;
   if (configFile.existsSync()) {
     config = Config.fromJson(configFile.readAsStringSync());
   } else {
-    config = Config(
-      dir: 'lib',
-      generators: [
-        Generator(dir: 'lib/models', type: 'model'),
-        Generator(dir: 'lib/constants', type: 'constant'),
-        Generator(dir: 'lib/component', type: 'index'),
-        Generator(dir: 'lib/mutations', type: 'index'),
-        Generator(dir: 'lib/screens', type: 'index'),
-        Generator(dir: 'lib/framework', type: 'index'),
-        Generator(dir: 'lib/utils', type: 'index'),
-      ],
-    );
+    config = defaultConfig;
     print(config.toJson());
   }
+
+  final enumGen = EnumGenerator();
+  final modelGen = ModelGenerator(enumGenerator: enumGen);
+  final indexGen = IndexGenerator();
 
   config.generators.forEach((g) {
     switch (g.type) {
       case 'model':
-        dartgen.generateModelDir(g.dir, g.recursive);
+        incrementalProcess(g.dir, g.recursive, modelGen.process);
         break;
       case 'constant':
-        dartgen.generateConstantDir(g.dir, g.recursive);
+        incrementalProcess(g.dir, g.recursive, enumGen.process);
         break;
       case 'index':
-        dartgen.generateIndex(g.dir, g.recursive);
+        var darts = listFiles(g.dir, g.recursive);
+        indexGen.process(darts);
         break;
       default:
     }
@@ -61,16 +56,19 @@ void main(List<String> arguments) {
         switch (g.type) {
           case 'model':
             if (event.type != ChangeType.REMOVE) {
-              dartgen.generateModel(event.path);
+              modelGen.process(event.path);
             }
             break;
           case 'constant':
             if (event.type != ChangeType.REMOVE) {
-              dartgen.generateConstant(event.path);
+              enumGen.process(event.path);
             }
             break;
           case 'index':
-            dartgen.generateIndex(g.dir, g.recursive);
+            var paths = listFiles(g.dir, g.recursive)
+                .map((i) => relativePath(i, g.dir))
+                .toList();
+            indexGen.process(paths);
             break;
           default:
         }
@@ -83,3 +81,45 @@ void main(List<String> arguments) {
     lastFile = event.path;
   });
 }
+
+Map<String, int> _lastModified = {};
+void incrementalProcess(
+  String dir,
+  bool recursive,
+  String Function(String) process,
+) {
+  var darts = listFiles(dir, recursive);
+  if (darts.isEmpty) return;
+
+  darts.forEach((dartFile) {
+    _lastModified[dartFile] ??= 0;
+    if (lastModTime(dartFile) <= _lastModified[dartFile]) {
+      return;
+    }
+
+    try {
+      var output = formatCode(process(dartFile));
+      saveFile(dartFile, output);
+    } catch (e) {
+      print(e);
+      return;
+    }
+
+    _lastModified[dartFile] = lastModTime(dartFile);
+  });
+
+  print('Done: $dir');
+}
+
+Config get defaultConfig => Config(
+      dir: 'lib',
+      generators: [
+        GeneratorConfig(dir: 'lib/models', type: 'model'),
+        GeneratorConfig(dir: 'lib/constants', type: 'constant'),
+        GeneratorConfig(dir: 'lib/component', type: 'index'),
+        GeneratorConfig(dir: 'lib/mutations', type: 'index'),
+        GeneratorConfig(dir: 'lib/screens', type: 'index'),
+        GeneratorConfig(dir: 'lib/framework', type: 'index'),
+        GeneratorConfig(dir: 'lib/utils', type: 'index'),
+      ],
+    );

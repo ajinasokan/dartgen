@@ -9,11 +9,14 @@ class Address {
     this.street,
   });
 
+  void patch(Map _data) {
+    if (_data == null) return null;
+    street = _data["street"];
+  }
+
   factory Address.fromMap(Map data) {
     if (data == null) return null;
-    return Address(
-      street: data["street"],
-    );
+    return Address()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {

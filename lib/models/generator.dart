@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 @pragma('model')
-class Generator {
+class GeneratorConfig {
   @pragma('json:dir')
   String dir;
 
@@ -11,7 +11,7 @@ class Generator {
   @pragma('json:recursive')
   bool recursive = false;
 
-  Generator({
+  GeneratorConfig({
     this.dir,
     this.type,
     this.recursive,
@@ -31,9 +31,9 @@ class Generator {
     init();
   }
 
-  factory Generator.fromMap(Map data) {
+  factory GeneratorConfig.fromMap(Map data) {
     if (data == null) return null;
-    return Generator()..patch(data);
+    return GeneratorConfig()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {
@@ -48,12 +48,12 @@ class Generator {
         "recursive": recursive,
       };
 
-  factory Generator.clone(Generator from) => Generator(
+  factory GeneratorConfig.clone(GeneratorConfig from) => GeneratorConfig(
         dir: from.dir,
         type: from.type,
         recursive: from.recursive,
       );
 
-  factory Generator.fromJson(String data) =>
-      Generator.fromMap(json.decode(data));
+  factory GeneratorConfig.fromJson(String data) =>
+      GeneratorConfig.fromMap(json.decode(data));
 }

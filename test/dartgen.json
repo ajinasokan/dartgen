@@ -1,0 +1,21 @@
+{
+    "dir": "lib",
+    "generators": [
+        {
+            "dir": "lib/models",
+            "type": "model"
+        },
+        {
+            "dir": "lib/models",
+            "type": "index"
+        },
+        {
+            "dir": "lib/constants",
+            "type": "constant"
+        },
+        {
+            "dir": "lib/constants",
+            "type": "index"
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 @pragma('enum')
 class Color {
   static const Red = Color('red');
+  static const Green = Color('green');
 
   static const keys = <String>['Red'];
   static const values = <String>['red'];

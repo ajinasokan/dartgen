@@ -1,12 +1,10 @@
-import '../utils.dart';
+import 'package:dartgen/generators/generator.dart';
 
-void generateIndex(String dir, bool recursive) {
-  var darts = listFiles(dir, recursive).map((i) => relativePath(i, dir));
-  if (darts.length == 0) return;
-
-  var exports = darts.map((i) => "export '$i';");
-  String output = exports.join('\n');
-  output = formatCode(output);
-  saveFile(dir + '/index.dart', output);
-  print("Done: $dir");
+class IndexGenerator extends DirectoryGenerator {
+  @override
+  String process(List<String> paths) {
+    if (paths.isEmpty) return null;
+    var exports = paths.map((i) => "export '$i';");
+    return exports.join('\n');
+  }
 }
