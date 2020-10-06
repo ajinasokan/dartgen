@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:watcher/watcher.dart';
 import 'package:dartgen/dartgen.dart';
 import 'package:dartgen/models/index.dart';
+import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
   final configFile = File('dartgen.json');
@@ -31,8 +32,10 @@ void main(List<String> arguments) {
         break;
       case 'index':
         print('Processing index of ${g.dir}');
-        var darts = listFiles(g.dir, g.recursive);
-        indexGen.process(darts);
+        var darts = listFiles(g.dir, g.recursive)
+            .map((i) => relativePath(i, g.dir))
+            .toList();
+        indexProcess(g.dir, darts, indexGen.process);
         break;
       default:
     }
@@ -75,7 +78,7 @@ void main(List<String> arguments) {
             var paths = listFiles(g.dir, g.recursive)
                 .map((i) => relativePath(i, g.dir))
                 .toList();
-            indexGen.process(paths);
+            indexProcess(g.dir, paths, indexGen.process);
             break;
           default:
         }
@@ -87,6 +90,20 @@ void main(List<String> arguments) {
 
     lastFile = event.path;
   });
+}
+
+void indexProcess(
+  String dir,
+  List<String> paths,
+  String Function(List<String>) process,
+) {
+  try {
+    var output = formatCode(process(paths));
+    saveFile(path.join(dir, 'index.dart'), output);
+  } catch (e) {
+    print(e);
+    return;
+  }
 }
 
 Map<String, int> _lastModified = {};
