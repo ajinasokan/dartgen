@@ -64,7 +64,7 @@ CompilationUnit readString(String code) {
 }
 
 void saveFile(String path, String data) {
-  new File(path).writeAsString(data);
+  File(path).writeAsStringSync(data);
 }
 
 List<ClassDeclaration> getClasses(CompilationUnit code) {

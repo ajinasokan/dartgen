@@ -1,6 +1,6 @@
 
 run:
-	cd test; dart ../bin/main.dart
+	cd test; dart dartgen_test.dart
 
 local:
 	pub global activate --source path .

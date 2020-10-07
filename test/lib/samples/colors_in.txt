@@ -1,0 +1,5 @@
+@pragma('enum')
+class Color {
+  static const Red = Color('red');
+  static const Green = Color('green');
+}

@@ -1,0 +1,18 @@
+import 'dart:convert';
+import 'address.dart';
+import '../constants/colors.dart';
+
+@pragma('model')
+class Person {
+  @pragma('json:name')
+  String name;
+
+  @pragma('json:int')
+  int age;
+
+  @pragma('json:address')
+  Address address;
+
+  @pragma('json:dress_color')
+  Color dressColor;
+}

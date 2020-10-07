@@ -5,6 +5,7 @@ import 'package:dartgen/models/index.dart';
 import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
+  _lastModified = {};
   final configFile = File('dartgen.json');
 
   Config config;
@@ -40,6 +41,8 @@ void main(List<String> arguments) {
       default:
     }
   });
+
+  if (!arguments.contains('watch')) return;
 
   var watcher = DirectoryWatcher(config.dir);
 
@@ -106,7 +109,7 @@ void indexProcess(
   }
 }
 
-Map<String, int> _lastModified = {};
+Map<String, int> _lastModified;
 void incrementalProcess(
   String dir,
   bool recursive,
