@@ -51,7 +51,7 @@ class ModelGenerator extends Generator {
       'dynamic'
     ];
 
-    var constants = enumGenerator.names;
+    var constants = enumGenerator?.names ?? {};
     var classElements = getClasses(code);
 
     for (var classElement in classElements) {

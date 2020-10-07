@@ -31,8 +31,8 @@ void main(List<String> arguments) {
     }
     try {
       g.init();
-    } catch (e) {
-      print('Generator init failed with exception: $e');
+    } catch (e, s) {
+      print('Generator init failed with exception: $e $s');
     }
     return g;
   }).toList();
@@ -58,8 +58,8 @@ void watch(Config config, List<Generator> generators) {
 
       try {
         g.process(event.path);
-      } catch (e) {
-        print('Generator failed with exception: $e');
+      } catch (e, s) {
+        print('Generator failed with exception: $e $s');
       }
     });
   });
