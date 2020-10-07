@@ -25,10 +25,10 @@ class Person {
 
   void patch(Map _data) {
     if (_data == null) return null;
-    name = _data["name"];
-    age = _data["int"];
-    address = Address.fromMap(_data["address"]);
-    dressColor = Color(_data["dress_color"]);
+    name = _data['name'];
+    age = _data['int'];
+    address = Address.fromMap(_data['address']);
+    dressColor = Color(_data['dress_color']);
   }
 
   factory Person.fromMap(Map data) {
@@ -37,17 +37,17 @@ class Person {
   }
 
   Map<String, dynamic> toMap() => {
-        "name": name,
-        "int": age,
-        "address": address?.toMap(),
-        "dress_color": dressColor?.value,
+        'name': name,
+        'int': age,
+        'address': address?.toMap(),
+        'dress_color': dressColor?.value,
       };
   String toJson() => json.encode(toMap());
   Map<String, dynamic> serialize() => {
-        "name": name,
-        "age": age,
-        "address": address?.serialize(),
-        "dressColor": dressColor?.value,
+        'name': name,
+        'age': age,
+        'address': address?.serialize(),
+        'dressColor': dressColor?.value,
       };
 
   factory Person.clone(Person from) => Person(
