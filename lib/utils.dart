@@ -21,8 +21,7 @@ List<String> listFiles(String path, [bool recursive = false]) {
     List contents = dir.listSync(recursive: recursive);
 
     for (var fileOrDir in contents) {
-      if (dartFile.matches(fileOrDir.path) &&
-          basename(fileOrDir.path) != 'index.dart') {
+      if (dartFile.matches(fileOrDir.path)) {
         files.add(fileOrDir.path);
       }
     }

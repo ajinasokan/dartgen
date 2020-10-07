@@ -1,5 +1,6 @@
 import 'package:dartgen/generators/generator.dart';
 import 'package:dartgen/models/index.dart';
+import 'package:path/path.dart' as p;
 import '../utils.dart';
 
 class IndexGenerator extends Generator {
@@ -26,21 +27,23 @@ class IndexGenerator extends Generator {
   @override
   void process(String path) {
     print('Index: ${config.dir}');
+    final outFileName = config.outputFile ?? 'index.dart';
     var paths = listFiles(config.dir, config.recursive)
         .map((i) => relativePath(i, config.dir))
         .toList();
+    paths.remove(outFileName);
     if (paths.isEmpty) return null;
     final exports = paths.map((i) => "export '$i';");
-    final outFile = config.dir + '/index.dart';
+    final outFilePath = p.join(config.dir, outFileName);
 
     try {
       var output = formatCode(exports.join('\n'));
-      saveFile(outFile, output);
+      saveFile(outFilePath, output);
     } catch (e) {
       print(e);
       return;
     }
 
-    _lastGenerated = outFile;
+    _lastGenerated = outFilePath;
   }
 }
