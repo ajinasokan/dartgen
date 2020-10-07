@@ -1,7 +1,10 @@
-abstract class FileGenerator {
-  String process(String path);
-}
+import 'package:watcher/watcher.dart' show WatchEvent;
+export 'package:watcher/watcher.dart' show WatchEvent, ChangeType;
 
-abstract class DirectoryGenerator {
-  String process(List<String> paths);
+abstract class Generator {
+  void init();
+  bool shouldRun(WatchEvent event);
+  bool isLastGenerated(String path);
+  void resetLastGenerated();
+  void process(String path);
 }

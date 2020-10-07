@@ -1,11 +1,10 @@
 import 'dart:io';
+import 'package:dartgen/generators/generator.dart';
 import 'package:watcher/watcher.dart';
 import 'package:dartgen/dartgen.dart';
 import 'package:dartgen/models/index.dart';
-import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
-  _lastModified = {};
   final configFile = File('dartgen.json');
 
   Config config;
@@ -16,126 +15,54 @@ void main(List<String> arguments) {
     print(config.toJson());
   }
 
-  final enumGen = EnumGenerator();
-  final modelGen = ModelGenerator(enumGenerator: enumGen);
-  final indexGen = IndexGenerator();
-
   // generate constants first so that models can make use of it
   config.generators.sort((a, b) => a.type == 'constant' ? -1 : 1);
 
-  config.generators.forEach((g) {
-    switch (g.type) {
-      case 'model':
-        incrementalProcess(g.dir, g.recursive, modelGen.process);
-        break;
-      case 'constant':
-        incrementalProcess(g.dir, g.recursive, enumGen.process);
-        break;
-      case 'index':
-        print('Processing index of ${g.dir}');
-        var darts = listFiles(g.dir, g.recursive)
-            .map((i) => relativePath(i, g.dir))
-            .toList();
-        indexProcess(g.dir, darts, indexGen.process);
-        break;
-      default:
+  EnumGenerator _lastEnumGen;
+  final generators = config.generators.map((config) {
+    Generator g;
+    if (config.type == 'constant') {
+      g = EnumGenerator(config: config);
+      _lastEnumGen = g;
+    } else if (config.type == 'model') {
+      g = ModelGenerator(config: config, enumGenerator: _lastEnumGen);
+    } else if (config.type == 'index') {
+      g = IndexGenerator(config: config);
     }
-  });
+    try {
+      g.init();
+    } catch (e) {
+      print('Generator init failed with exception: $e');
+    }
+    return g;
+  }).toList();
 
-  if (!arguments.contains('watch')) return;
+  if (arguments.contains('watch')) watch(config, generators);
+}
 
+void watch(Config config, List<Generator> generators) {
   var watcher = DirectoryWatcher(config.dir);
 
   print('Watching changes..');
 
-  String lastFile;
+  generators.forEach((g) => g.resetLastGenerated());
+
   watcher.events.listen((event) {
-    // TODO: replace this with output file name from config
-    if (event.path.endsWith('index.dart')) return;
-
-    // dont generate for the file that was the output of last run
-    if (event.path == lastFile) {
-      lastFile = null;
-      return;
-    }
-
-    print(event);
-
-    config.generators.forEach((g) {
-      if (!event.path.startsWith(g.dir)) {
+    generators.forEach((g) {
+      if (g == null) return;
+      if (!g.shouldRun(event)) return;
+      if (g.isLastGenerated(event.path)) {
+        g.resetLastGenerated();
         return;
       }
+
       try {
-        switch (g.type) {
-          case 'model':
-            if (event.type != ChangeType.REMOVE) {
-              modelGen.process(event.path);
-            }
-            break;
-          case 'constant':
-            if (event.type != ChangeType.REMOVE) {
-              enumGen.process(event.path);
-            }
-            break;
-          case 'index':
-            var paths = listFiles(g.dir, g.recursive)
-                .map((i) => relativePath(i, g.dir))
-                .toList();
-            indexProcess(g.dir, paths, indexGen.process);
-            break;
-          default:
-        }
-      } catch (e, s) {
-        print(e);
-        print(s);
+        g.process(event.path);
+      } catch (e) {
+        print('Generator failed with exception: $e');
       }
     });
-
-    lastFile = event.path;
   });
-}
-
-void indexProcess(
-  String dir,
-  List<String> paths,
-  String Function(List<String>) process,
-) {
-  try {
-    var output = formatCode(process(paths));
-    saveFile(path.join(dir, 'index.dart'), output);
-  } catch (e) {
-    print(e);
-    return;
-  }
-}
-
-Map<String, int> _lastModified;
-void incrementalProcess(
-  String dir,
-  bool recursive,
-  String Function(String) process,
-) {
-  var darts = listFiles(dir, recursive);
-  if (darts.isEmpty) return;
-
-  darts.forEach((dartFile) {
-    _lastModified[dartFile] ??= 0;
-    if (lastModTime(dartFile) <= _lastModified[dartFile]) {
-      return;
-    }
-
-    try {
-      var output = formatCode(process(dartFile));
-      saveFile(dartFile, output);
-    } catch (e) {
-      print(e);
-      return;
-    }
-
-    _lastModified[dartFile] = lastModTime(dartFile);
-  });
-
-  print('Done: $dir');
 }
 
 Config get defaultConfig => Config(

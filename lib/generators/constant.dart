@@ -1,13 +1,36 @@
 import '../utils.dart';
 import '../code_replacer.dart';
 import 'generator.dart';
+import '../models/generator.dart';
 
-class EnumGenerator extends FileGenerator {
-  Set<String> names = {};
+class EnumGenerator extends Generator {
+  final GeneratorConfig config;
+  final Set<String> names = {};
+  String _lastGenerated;
+
+  EnumGenerator({this.config});
 
   @override
-  String process(String path) {
-    print('Processing $path');
+  void init() {
+    var darts = listFiles(config.dir, config.recursive);
+    if (darts.isEmpty) return;
+
+    darts.forEach((dartFile) => process(dartFile));
+  }
+
+  @override
+  bool shouldRun(WatchEvent event) =>
+      event.path.startsWith(config.dir) && event.type != ChangeType.REMOVE;
+
+  @override
+  bool isLastGenerated(String path) => path == _lastGenerated;
+
+  @override
+  void resetLastGenerated() => _lastGenerated = null;
+
+  @override
+  void process(String path) {
+    print('Enum: $path');
     var replacer = CodeReplacer(fileContents(path));
     var code = readFile(path);
 
@@ -66,6 +89,14 @@ String toString() => value;
       replacer.add(classItem.offset + classItem.length - 1, 0, template);
     });
 
-    return replacer.process();
+    try {
+      var output = formatCode(replacer.process());
+      saveFile(path, output);
+    } catch (e) {
+      print(e);
+      return;
+    }
+
+    _lastGenerated = path;
   }
 }

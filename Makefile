@@ -1,5 +1,9 @@
 
 run:
+	cd test; dart ../bin/main.dart
+
+.PHONY: test
+test:
 	cd test; dart dartgen_test.dart
 
 local:

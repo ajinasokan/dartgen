@@ -1,17 +1,41 @@
 import 'package:dartgen/dartgen.dart';
 import 'package:dartgen/generators/generator.dart';
+import 'package:dartgen/models/index.dart';
 
 import '../utils.dart';
 import '../code_replacer.dart';
 
-class ModelGenerator extends FileGenerator {
+class ModelGenerator extends Generator {
+  final GeneratorConfig config;
   final EnumGenerator enumGenerator;
+  String _lastGenerated;
 
-  ModelGenerator({this.enumGenerator});
+  ModelGenerator({
+    this.config,
+    this.enumGenerator,
+  });
 
   @override
-  String process(String dartFile) {
-    print('Processing $dartFile');
+  void init() {
+    var darts = listFiles(config.dir, config.recursive);
+    if (darts.isEmpty) return;
+
+    darts.forEach((dartFile) => process(dartFile));
+  }
+
+  @override
+  bool shouldRun(WatchEvent event) =>
+      event.path.startsWith(config.dir) && event.type != ChangeType.REMOVE;
+
+  @override
+  bool isLastGenerated(String path) => path == _lastGenerated;
+
+  @override
+  void resetLastGenerated() => _lastGenerated = null;
+
+  @override
+  void process(String dartFile) {
+    print('Model: $dartFile');
 
     var replacer = CodeReplacer(fileContents(dartFile));
 
@@ -268,6 +292,14 @@ class ModelGenerator extends FileGenerator {
           classElement.offset + classElement.length - 1, 0, output.toString());
     }
 
-    return replacer.process();
+    try {
+      var output = formatCode(replacer.process());
+      saveFile(dartFile, output);
+    } catch (e) {
+      print(e);
+      return;
+    }
+
+    _lastGenerated = dartFile;
   }
 }
