@@ -161,7 +161,7 @@ class ModelGenerator extends Generator {
               serialize += "'$name': $name,";
             } else {
               serialize +=
-                  '"$name": $name.map((k, v) => MapEntry(k$type1, v$type2)),';
+                  "'$name': $name.map((k, v) => MapEntry(k$type1, v$type2)),";
             }
           } else if (type == 'Map') {
             serialize += "'$name': $name,";
@@ -173,10 +173,10 @@ class ModelGenerator extends Generator {
               serialize += "'$name': $name,";
             } else if (constants.contains(listPrimitive)) {
               serialize +=
-                  '"$name": $name.map((dynamic i) => i?.value).toList(),';
+                  "'$name': $name.map((dynamic i) => i?.value).toList(),";
             } else {
               serialize +=
-                  '"$name": $name.map((dynamic i) => i?.serialize()).toList(),';
+                  "'$name': $name.map((dynamic i) => i?.serialize()).toList(),";
             }
           } else {
             serialize += "'$name': $name?.serialize(),";
