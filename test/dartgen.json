@@ -16,6 +16,10 @@
         {
             "dir": "lib/constants",
             "type": "index"
+        },
+        {
+            "dir": "lib/files",
+            "type": "embed"
         }
     ]
 }

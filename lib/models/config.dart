@@ -42,7 +42,7 @@ class Config {
   String toJson() => json.encode(toMap());
   Map<String, dynamic> serialize() => {
         'dir': dir,
-        "generators": generators.map((dynamic i) => i?.serialize()).toList(),
+        'generators': generators.map((dynamic i) => i?.serialize()).toList(),
       };
 
   factory Config.clone(Config from) => Config(

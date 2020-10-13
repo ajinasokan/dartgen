@@ -1,5 +1,5 @@
 name: dartgen
-description: A sample command-line application.
+description: An inline generator collection for Dart.
 version: 1.0.0
 homepage: https://github.com/ajinasokan/dartgen
 author: ajinasokan <ajinpanthayil@gmail.com>
@@ -11,7 +11,8 @@ dependencies:
   analyzer: 0.37.0
   watcher: 0.9.7+10
   dart_style: 1.2.9
-#  path: ^1.4.1
+  strings: 0.1.2
+  slugify: 1.0.0
 
 dev_dependencies:
   pedantic: ^1.0.0

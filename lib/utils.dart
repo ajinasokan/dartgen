@@ -7,16 +7,13 @@ import 'package:dart_style/src/source_visitor.dart';
 
 export 'package:analyzer/analyzer.dart';
 
-// String scriptPath(String path) {
-//   return normalize(dirname(Platform.script.toFilePath()) + '/' + path);
-// }
-
-List<String> listFiles(String path, [bool recursive = false]) {
+List<String> listFiles(String path,
+    [bool recursive = false, bool allFiles = false]) {
   List<String> files = [];
   try {
-    var dir = new Directory(path);
+    var dir = Directory(path);
 
-    final dartFile = new Glob("**.dart");
+    final dartFile = allFiles ? Glob('**') : Glob('**.dart');
 
     List contents = dir.listSync(recursive: recursive);
 

@@ -7,6 +7,7 @@ An inline generator collection for Dart. Unlike the standard code generators Dar
 - Generate enums with serializers.
 - Generate model serializers. You can add enums inside these models as well.
 - Generate index from a directory. This file will export all the `.dart` files.
+- Embed files from a directory.
 - Watches for file changes.
 - Config file to setup multiple generators.
 - Option to enable recursive travel of dirs.

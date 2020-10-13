@@ -27,7 +27,9 @@ void main(List<String> arguments) {
     } else if (config.type == 'model') {
       g = ModelGenerator(config: config, enumGenerator: _lastEnumGen);
     } else if (config.type == 'index') {
-      g = IndexGenerator(config: config);
+      g = FileIndexGenerator(config: config);
+    } else if (config.type == 'embed') {
+      g = FileEmbedGenerator(config: config);
     }
     try {
       g.init();

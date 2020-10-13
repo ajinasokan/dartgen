@@ -8,6 +8,10 @@
         {
             "dir": "lib/models",
             "type": "index"
+        },
+        {
+            "dir": "lib/generators",
+            "type": "index"
         }
     ]
 }
