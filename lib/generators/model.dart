@@ -37,9 +37,9 @@ class ModelGenerator extends Generator {
   void process(String dartFile) {
     print('Model: $dartFile');
 
-    var replacer = CodeReplacer(fileContents(dartFile));
+    var replacer = CodeReplacer(fileReadString(dartFile));
 
-    var code = readFile(dartFile);
+    var code = parseDartFile(dartFile);
     if (code == null) return null;
 
     final primitives = <String>[
@@ -294,7 +294,7 @@ class ModelGenerator extends Generator {
 
     try {
       var output = formatCode(replacer.process());
-      saveFile(dartFile, output);
+      fileWriteString(dartFile, output);
     } catch (e) {
       print(e);
       return;

@@ -31,8 +31,8 @@ class EnumGenerator extends Generator {
   @override
   void process(String path) {
     print('Enum: $path');
-    var replacer = CodeReplacer(fileContents(path));
-    var code = readFile(path);
+    var replacer = CodeReplacer(fileReadString(path));
+    var code = parseDartFile(path);
 
     getClasses(code).forEach((classItem) {
       var enumName = getClassName(classItem);
@@ -91,7 +91,7 @@ String toString() => value;
 
     try {
       var output = formatCode(replacer.process());
-      saveFile(path, output);
+      fileWriteString(path, output);
     } catch (e) {
       print(e);
       return;

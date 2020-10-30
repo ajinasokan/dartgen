@@ -36,7 +36,7 @@ class FileEmbedGenerator extends Generator {
     var filesPaths = listFiles(config.dir, config.recursive, true);
 
     var relativePaths =
-        filesPaths.map((i) => relativePath(i, config.dir)).toList();
+        filesPaths.map((i) => p.relative(i, from: config.dir)).toList();
     relativePaths.remove(outFileName);
     if (relativePaths.isEmpty) return null;
 
@@ -44,7 +44,7 @@ class FileEmbedGenerator extends Generator {
 
     try {
       var output = formatCode(filesPaths.map((i) {
-        final relFilePath = relativePath(i, config.dir);
+        final relFilePath = p.relative(i, from: config.dir);
         if (relFilePath == outFileName) return '';
 
         final fileName = p.basename(relFilePath);
@@ -54,7 +54,7 @@ class FileEmbedGenerator extends Generator {
             '\';\n';
       }).join(''));
 
-      saveFile(outFilePath, output);
+      fileWriteString(outFilePath, output);
     } catch (e) {
       print(e);
       return;

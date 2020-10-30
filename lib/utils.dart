@@ -1,15 +1,14 @@
 import 'dart:io';
-import 'package:path/path.dart';
 import 'package:glob/glob.dart';
-import 'package:analyzer/analyzer.dart';
 import 'package:dart_style/dart_style.dart';
-import 'package:dart_style/src/source_visitor.dart';
+import 'package:analyzer/dart/analysis/utilities.dart';
+import 'package:analyzer/dart/ast/ast.dart';
 
-export 'package:analyzer/analyzer.dart';
+export 'package:analyzer/dart/ast/ast.dart';
 
 List<String> listFiles(String path,
     [bool recursive = false, bool allFiles = false]) {
-  List<String> files = [];
+  final files = <String>[];
   try {
     var dir = Directory(path);
 
@@ -22,57 +21,36 @@ List<String> listFiles(String path,
         files.add(fileOrDir.path);
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    print('Exception while listing files: $e');
+  }
   files.sort();
   return files;
 }
 
-String relativePath(String path, String from) {
-  return relative(path, from: from);
-}
+String fileReadString(String path) => File(path).readAsStringSync();
 
-String fileName(String path) {
-  return basename(path);
-}
+void fileWriteString(String path, String data) =>
+    File(path).writeAsStringSync(data);
 
-String fileContents(String path) {
-  return File(path).readAsStringSync();
-}
-
-int lastModTime(String path) {
-  return File(path).lastModifiedSync().millisecondsSinceEpoch;
-}
-
-CompilationUnit readFile(String path) {
+CompilationUnit parseDartFile(String path) {
   try {
-    return parseDartFile(path);
+    return parseString(content: fileReadString(path)).unit;
   } catch (e) {
     return null;
   }
-}
-
-CompilationUnit readString(String code) {
-  try {
-    return parseCompilationUnit(code);
-  } catch (e) {
-    return null;
-  }
-}
-
-void saveFile(String path, String data) {
-  File(path).writeAsStringSync(data);
 }
 
 List<ClassDeclaration> getClasses(CompilationUnit code) {
   return code.childEntities
-      .where((i) => i is ClassDeclaration)
+      .whereType<ClassDeclaration>()
       .toList()
       .cast<ClassDeclaration>();
 }
 
 List<FunctionDeclaration> getMethods(CompilationUnit code) {
   return code.childEntities
-      .where((i) => i is FunctionDeclaration)
+      .whereType<FunctionDeclaration>()
       .toList()
       .cast<FunctionDeclaration>();
 }
@@ -107,35 +85,23 @@ String formatCode(String code) {
   return DartFormatter().format(code);
 }
 
-// String formatUnit(CompilationUnit unit) {
-//   var source = SourceCode(source, uri: uri, isCompilationUnit: true);
-//   var visitor = SourceVisitor(this, lineInfo, source);
-//   var output = visitor.run(unit);
-//   return output.text;
-// }
-
 String getTag(Declaration i) {
-  if (i.metadata.length == 0) return '';
+  if (i.metadata.isEmpty) return '';
 
-  Annotation ann = i.metadata[0];
-
-  if (ann.name.toString() != 'pragma') return '';
-
-  SimpleStringLiteral val = ann.arguments.arguments[0];
+  final annotation = i.metadata[0];
+  if (annotation.name.toString() != 'pragma') return '';
+  SimpleStringLiteral val = annotation.arguments.arguments[0];
 
   return val.value;
 }
 
 String getTagArgs(Declaration i) {
-  if (i.metadata.length == 0) return '';
+  if (i.metadata.isEmpty) return '';
 
-  Annotation ann = i.metadata[0];
-
-  if (ann.name.toString() != 'pragma') return '';
-
-  if (ann.arguments.arguments.length < 2) return '';
-
-  SimpleStringLiteral val = ann.arguments.arguments[1];
+  final annotation = i.metadata[0];
+  if (annotation.name.toString() != 'pragma') return '';
+  if (annotation.arguments.arguments.length < 2) return '';
+  SimpleStringLiteral val = annotation.arguments.arguments[1];
 
   return val.value;
 }

@@ -29,7 +29,7 @@ class FileIndexGenerator extends Generator {
     print('Index: ${config.dir}');
     final outFileName = config.outputFile ?? 'index.dart';
     var paths = listFiles(config.dir, config.recursive)
-        .map((i) => relativePath(i, config.dir))
+        .map((i) => p.relative(i, from: config.dir))
         .toList();
     paths.remove(outFileName);
     if (paths.isEmpty) return null;
@@ -38,7 +38,7 @@ class FileIndexGenerator extends Generator {
 
     try {
       var output = formatCode(exports.join('\n'));
-      saveFile(outFilePath, output);
+      fileWriteString(outFilePath, output);
     } catch (e) {
       print(e);
       return;
