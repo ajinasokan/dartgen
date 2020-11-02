@@ -55,13 +55,6 @@ class GeneratorConfig {
         'outputFile': outputFile,
       };
 
-  factory GeneratorConfig.clone(GeneratorConfig from) => GeneratorConfig(
-        dir: from.dir,
-        type: from.type,
-        recursive: from.recursive,
-        outputFile: from.outputFile,
-      );
-
   factory GeneratorConfig.fromJson(String data) =>
       GeneratorConfig.fromMap(json.decode(data));
 }

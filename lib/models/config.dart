@@ -45,10 +45,5 @@ class Config {
         'generators': generators.map((dynamic i) => i?.serialize()).toList(),
       };
 
-  factory Config.clone(Config from) => Config(
-        dir: from.dir,
-        generators: from.generators,
-      );
-
   factory Config.fromJson(String data) => Config.fromMap(json.decode(data));
 }

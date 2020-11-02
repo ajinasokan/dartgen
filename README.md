@@ -12,7 +12,40 @@ An inline generator collection for Dart. Unlike the standard code generators Dar
 - Config file to setup multiple generators.
 - Option to enable recursive travel of dirs.
 
-## Sample Config
+## Install
+
+From git:
+
+```shell
+$ pub global activate --source git https://github.com/ajinasokan/dartgen
+```
+
+Make sure you [set the $PATH](https://dart.dev/tools/pub/cmd/pub-global#running-a-script-from-your-path) for pub. To verify run:
+
+```shell
+$ dartgen
+
+No dartgen.json found in this directory.
+
+Example config:
+{
+  "dir": "lib",
+  "generators": [
+      { "dir": "lib/models", "type": "model" },
+      { "dir": "lib/models", "type": "index" },
+      { "dir": "lib/constants", "type": "constant" },
+      { "dir": "lib/constants", "type": "index" },
+  ],
+}
+```
+
+To run in watch mode:
+
+```shell
+$ dartgen watch
+```
+
+## Config
 
 ```json
 {
@@ -23,7 +56,20 @@ An inline generator collection for Dart. Unlike the standard code generators Dar
         { "dir": "lib/constants", "type": "constant" },
         { "dir": "lib/constants", "type": "index" },
         { "dir": "lib/components", "type": "index", "recursive": true },
-        { "dir": "lib/screens", "type": "index", "recursive": true }
+        { "dir": "lib/screens", "type": "index", "recursive": true },
+        { "dir": "lib/svgs", "type": "embed" }
     ]
 }
 ```
+
+Explanation:
+
+`.dir` directory to watch file changes. Run `dartgen watch` to take this into consideration.
+
+`.generators` list of all generators to run. This can be `model`, `constant`, `index` or `embed` generators. You can have more than one kind of generator executing in same directory.
+
+`.generators.dir` sets the directory to run a particular generator.
+
+`.generators.type` sets the type of the generator to run in the above directory.
+
+`.generators.recursive` sets whether to run this generator recursively in the directory.
