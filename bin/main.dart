@@ -77,16 +77,3 @@ void watch(Config config, List<Generator> generators) {
     });
   });
 }
-
-Config get defaultConfig => Config(
-      dir: 'lib',
-      generators: [
-        GeneratorConfig(dir: 'lib/models', type: 'model'),
-        GeneratorConfig(dir: 'lib/constants', type: 'constant'),
-        GeneratorConfig(dir: 'lib/component', type: 'index'),
-        GeneratorConfig(dir: 'lib/mutations', type: 'index'),
-        GeneratorConfig(dir: 'lib/screens', type: 'index'),
-        GeneratorConfig(dir: 'lib/framework', type: 'index'),
-        GeneratorConfig(dir: 'lib/utils', type: 'index'),
-      ],
-    );
