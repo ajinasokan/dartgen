@@ -30,6 +30,18 @@ void main() {
     );
   });
 
+  test('model generation patchWith', () {
+    writeFile(
+      'lib/models/store.dart',
+      readFile('lib/samples/store_in.txt'),
+    );
+    runGenerator();
+    shouldCodeMatch(
+      readFile('lib/models/store.dart'),
+      readFile('lib/samples/store_out.txt'),
+    );
+  });
+
   test('index generation', () {
     writeFile(
       'lib/models/index.dart',

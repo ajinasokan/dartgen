@@ -95,13 +95,13 @@ String getTag(Declaration i) {
   return val.value;
 }
 
-String getTagArgs(Declaration i) {
-  if (i.metadata.isEmpty) return '';
+List<String> getTagArgs(Declaration i) {
+  if (i.metadata.isEmpty) return [];
 
   final annotation = i.metadata[0];
-  if (annotation.name.toString() != 'pragma') return '';
-  if (annotation.arguments.arguments.length < 2) return '';
+  if (annotation.name.toString() != 'pragma') return [];
+  if (annotation.arguments.arguments.length < 2) return [];
   SimpleStringLiteral val = annotation.arguments.arguments[1];
 
-  return val.value;
+  return val.value.split(',');
 }

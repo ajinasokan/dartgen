@@ -50,12 +50,5 @@ class Person {
         'dressColor': dressColor?.value,
       };
 
-  factory Person.clone(Person from) => Person(
-        name: from.name,
-        age: from.age,
-        address: from.address,
-        dressColor: from.dressColor,
-      );
-
   factory Person.fromJson(String data) => Person.fromMap(json.decode(data));
 }

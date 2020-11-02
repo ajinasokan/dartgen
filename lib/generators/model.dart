@@ -277,11 +277,13 @@ class ModelGenerator extends Generator {
       output.writeln('};');
       output.writeln('String toJson() => json.encode(toMap());');
       output.writeln('Map<String, dynamic> serialize() => {$serialize};');
-      if (metaArgs == 'patchWith') {
+      if (metaArgs.contains('patchWith')) {
         output.writeln('\nvoid patchWith($className clone) { $patchWith }');
       }
-      output.writeln(
-          '\nfactory $className.clone($className from) => $className($clone);');
+      if (metaArgs.contains('clone')) {
+        output.writeln(
+            '\nfactory $className.clone($className from) => $className($clone);');
+      }
       output.writeln(extraCode);
       output.writeln(
           'factory $className.fromJson(String data) => $className.fromMap(json.decode(data));');

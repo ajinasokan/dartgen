@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-@pragma('model')
-class Address {
+@pragma('model', 'patchWith,clone,serialize')
+class Store {
   @pragma('json:street')
   String street;
 
-  Address({
+  Store({
     this.street,
   });
 
@@ -14,9 +14,9 @@ class Address {
     street = _data['street'];
   }
 
-  factory Address.fromMap(Map data) {
+  factory Store.fromMap(Map data) {
     if (data == null) return null;
-    return Address()..patch(data);
+    return Store()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {
@@ -27,5 +27,13 @@ class Address {
         'street': street,
       };
 
-  factory Address.fromJson(String data) => Address.fromMap(json.decode(data));
+  void patchWith(Store clone) {
+    street = clone.street;
+  }
+
+  factory Store.clone(Store from) => Store(
+        street: from.street,
+      );
+
+  factory Store.fromJson(String data) => Store.fromMap(json.decode(data));
 }
