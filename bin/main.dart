@@ -11,8 +11,19 @@ void main(List<String> arguments) {
   if (configFile.existsSync()) {
     config = Config.fromJson(configFile.readAsStringSync());
   } else {
-    config = defaultConfig;
-    print(config.toJson());
+    print("""No dartgen.json found in this directory.
+
+Example config:
+{
+  "dir": "lib",
+  "generators": [
+      { "dir": "lib/models", "type": "model" },
+      { "dir": "lib/models", "type": "index" },
+      { "dir": "lib/constants", "type": "constant" },
+      { "dir": "lib/constants", "type": "index" },
+  ],
+}""");
+    return;
   }
 
   // generate constants first so that models can make use of it
