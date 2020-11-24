@@ -2,7 +2,9 @@
 
 # DartGen
 
-An inline generator collection for Dart. Unlike the standard code generators DartGen doesn't produce `.g.dart` files instead the code is inserted into the actual definition itself. This is very similar to how `dartfmt` works. This can also be compared to how Java IDEs generate the getters and setters for fields. The objective of this flow is to keep the project clean and make codebase more readable.
+An inline generator collection for Dart. Generate JSON serializers, enums with mapped values and iterables, export index etc. for your Flutter or Dart projects.
+
+Unlike the standard code generators DartGen doesn't produce `.g.dart` files. Instead the code is inserted into the actual definition itself. This is very similar to how `dartfmt` works. This can also be compared to how Java IDEs generate the getters and setters for fields. The objective of this flow is to keep the project clean and make codebase more readable.
 
 ## Features
 
