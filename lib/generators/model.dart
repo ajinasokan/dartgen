@@ -217,24 +217,23 @@ class ModelGenerator extends Generator {
                 type.replaceAll('List<', '').replaceAll('>', '');
             if (['String', 'num', 'bool', 'dynamic'].contains(listPrimitive)) {
               toMap += "'$key': $name,\n";
-              patcher +=
-                  "$name = (_data['$key'] ?? []).cast<$listPrimitive>();\n";
+              patcher += "$name = _data['$key']?.cast<$listPrimitive>();\n";
             } else if (listPrimitive == 'int') {
               toMap += "'$key': $name,\n";
               patcher +=
-                  "$name = (_data['$key'] ?? []).map((i) => i ~/ 1).toList().cast<int>();\n";
+                  "$name = _data['$key']?.map((i) => i ~/ 1)?.toList()?.cast<int>();\n";
             } else if (listPrimitive == 'double') {
               toMap += "'$key': $name,\n";
               patcher +=
-                  "$name = (_data['$key'] ?? []).map((i) => i * 1.0).toList().cast<double>();\n";
+                  "$name = _data['$key']?.map((i) => i * 1.0)?.toList()?.cast<double>();\n";
             } else if (constants.contains(listPrimitive)) {
               toMap += "'$key': $name?.map((i) => i.value)?.toList(),\n";
               patcher +=
-                  "$name = (_data['$key'] ?? []).map((i) => new $listPrimitive(i)).toList().cast<$listPrimitive>();\n";
+                  "$name = _data['$key']?.map((i) => new $listPrimitive(i))?.toList()?.cast<$listPrimitive>();\n";
             } else {
               toMap += "'$key': $name?.map((i) => i.toMap())?.toList(),\n";
               patcher +=
-                  "$name = (_data['$key'] ?? []).map((i) => $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>();\n";
+                  "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i))?.toList()?.cast<$listPrimitive>();\n";
             }
           } else {
             toMap += "'$key': $name?.toMap(),";
