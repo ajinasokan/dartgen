@@ -6,9 +6,9 @@ import 'package:analyzer/dart/ast/ast.dart';
 
 export 'package:analyzer/dart/ast/ast.dart';
 
-List<String> listFiles(String path,
+List<String?> listFiles(String path,
     [bool recursive = false, bool allFiles = false]) {
-  final files = <String>[];
+  final files = <String?>[];
   try {
     var dir = Directory(path);
 
@@ -33,7 +33,7 @@ String fileReadString(String path) => File(path).readAsStringSync();
 void fileWriteString(String path, String data) =>
     File(path).writeAsStringSync(data);
 
-CompilationUnit parseDartFile(String path) {
+CompilationUnit? parseDartFile(String path) {
   try {
     return parseString(content: fileReadString(path)).unit;
   } catch (e) {
@@ -75,7 +75,7 @@ String getFieldValue(FieldDeclaration field) {
   return field.fields.variables.first.initializer.toString();
 }
 
-String getConstructorInput(FieldDeclaration field) {
+String? getConstructorInput(FieldDeclaration field) {
   var mi = field.fields.variables.first.initializer as MethodInvocation;
   var val = mi.argumentList.arguments.first as SimpleStringLiteral;
   return val.stringValue;
@@ -90,7 +90,7 @@ String getTag(Declaration i) {
 
   final annotation = i.metadata[0];
   if (annotation.name.toString() != 'pragma') return '';
-  SimpleStringLiteral val = annotation.arguments.arguments[0];
+  SimpleStringLiteral val = annotation.arguments!.arguments[0] as SimpleStringLiteral;
 
   return val.value;
 }
@@ -100,8 +100,8 @@ List<String> getTagArgs(Declaration i) {
 
   final annotation = i.metadata[0];
   if (annotation.name.toString() != 'pragma') return [];
-  if (annotation.arguments.arguments.length < 2) return [];
-  SimpleStringLiteral val = annotation.arguments.arguments[1];
+  if (annotation.arguments!.arguments.length < 2) return [];
+  SimpleStringLiteral val = annotation.arguments!.arguments[1] as SimpleStringLiteral;
 
   return val.value.split(',');
 }

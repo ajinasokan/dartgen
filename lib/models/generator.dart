@@ -3,16 +3,16 @@ import 'dart:convert';
 @pragma('model')
 class GeneratorConfig {
   @pragma('json:dir')
-  String dir;
+  String? dir;
 
   @pragma('json:type')
-  String type;
+  String? type;
 
   @pragma('json:recursive')
-  bool recursive = false;
+  bool? recursive = false;
 
   @pragma('json:output_file')
-  String outputFile;
+  String? outputFile;
 
   GeneratorConfig({
     this.dir,
@@ -36,7 +36,7 @@ class GeneratorConfig {
     init();
   }
 
-  factory GeneratorConfig.fromMap(Map data) {
+  static GeneratorConfig? fromMap(Map? data) {
     if (data == null) return null;
     return GeneratorConfig()..patch(data);
   }
@@ -55,6 +55,6 @@ class GeneratorConfig {
         'outputFile': outputFile,
       };
 
-  factory GeneratorConfig.fromJson(String data) =>
+  static GeneratorConfig? fromJson(String data) =>
       GeneratorConfig.fromMap(json.decode(data));
 }

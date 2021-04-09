@@ -4,23 +4,23 @@ import 'generator.dart';
 import '../models/generator.dart';
 
 class EnumGenerator extends Generator {
-  final GeneratorConfig config;
+  final GeneratorConfig? config;
   final Set<String> names = {};
-  String _lastGenerated;
+  String? _lastGenerated;
 
   EnumGenerator({this.config});
 
   @override
   void init() {
-    var darts = listFiles(config.dir, config.recursive);
+    var darts = listFiles(config!.dir!, config!.recursive!);
     if (darts.isEmpty) return;
 
-    darts.forEach((dartFile) => process(dartFile));
+    darts.forEach((dartFile) => process(dartFile!));
   }
 
   @override
   bool shouldRun(WatchEvent event) =>
-      event.path.startsWith(config.dir) && event.type != ChangeType.REMOVE;
+      event.path.startsWith(config!.dir!) && event.type != ChangeType.REMOVE;
 
   @override
   bool isLastGenerated(String path) => path == _lastGenerated;
@@ -32,7 +32,7 @@ class EnumGenerator extends Generator {
   void process(String path) {
     print('Enum: $path');
     var replacer = CodeReplacer(fileReadString(path));
-    var code = parseDartFile(path);
+    var code = parseDartFile(path)!;
 
     getClasses(code).forEach((classItem) {
       var enumName = getClassName(classItem);
@@ -58,7 +58,7 @@ class EnumGenerator extends Generator {
           replacer.space(field.offset, field.length);
         } else if (field is FieldDeclaration && field.fields.isConst) {
           var constant = getFieldName(field);
-          var value = getConstructorInput(field);
+          var value = getConstructorInput(field)!;
 
           items.add(constant);
           keys.add("'" + constant + "'");

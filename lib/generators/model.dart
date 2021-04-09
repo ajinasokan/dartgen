@@ -6,9 +6,9 @@ import '../utils.dart';
 import '../code_replacer.dart';
 
 class ModelGenerator extends Generator {
-  final GeneratorConfig config;
-  final EnumGenerator enumGenerator;
-  String _lastGenerated;
+  final GeneratorConfig? config;
+  final EnumGenerator? enumGenerator;
+  String? _lastGenerated;
 
   ModelGenerator({
     this.config,
@@ -17,15 +17,15 @@ class ModelGenerator extends Generator {
 
   @override
   void init() {
-    var darts = listFiles(config.dir, config.recursive);
+    var darts = listFiles(config!.dir!, config!.recursive!);
     if (darts.isEmpty) return;
 
-    darts.forEach((dartFile) => process(dartFile));
+    darts.forEach((dartFile) => process(dartFile!));
   }
 
   @override
   bool shouldRun(WatchEvent event) =>
-      event.path.startsWith(config.dir) && event.type != ChangeType.REMOVE;
+      event.path.startsWith(config!.dir!) && event.type != ChangeType.REMOVE;
 
   @override
   bool isLastGenerated(String path) => path == _lastGenerated;
@@ -91,6 +91,7 @@ class ModelGenerator extends Generator {
       var fieldsToDelete = <String>[];
       for (var member in fields) {
         if (member is ConstructorDeclaration) {
+          // TODO: exclude user defined constructors
           replacer.space(member.offset, member.length);
           continue;
         } else if (member is FieldDeclaration &&
@@ -269,7 +270,7 @@ class ModelGenerator extends Generator {
       output.writeln('}');
 
       output.writeln(
-          '\nfactory $className.fromMap(Map data) { if(data == null) return null; return $className()..patch(data); }');
+          '\static $className? fromMap(Map data) { if(data == null) return null; return $className()..patch(data); }');
 
       output.writeln('\nMap<String, dynamic> toMap() => {');
       output.write(toMap);
@@ -281,11 +282,11 @@ class ModelGenerator extends Generator {
       }
       if (metaArgs.contains('clone')) {
         output.writeln(
-            '\nfactory $className.clone($className from) => $className($clone);');
+            '\static $className clone($className from) => $className($clone);');
       }
       output.writeln(extraCode);
       output.writeln(
-          'factory $className.fromJson(String data) => $className.fromMap(json.decode(data));');
+          'static $className? fromJson(String data) => $className.fromMap(json.decode(data));');
 
       // output.writeln('}');
 

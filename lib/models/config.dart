@@ -4,10 +4,10 @@ import 'generator.dart';
 @pragma('model')
 class Config {
   @pragma('json:dir')
-  String dir;
+  String? dir;
 
   @pragma('json:generators')
-  List<GeneratorConfig> generators = [];
+  List<GeneratorConfig>? generators = [];
 
   Config({
     this.dir,
@@ -30,7 +30,7 @@ class Config {
     init();
   }
 
-  factory Config.fromMap(Map data) {
+  static Config? fromMap(Map? data) {
     if (data == null) return null;
     return Config()..patch(data);
   }
@@ -42,8 +42,8 @@ class Config {
   String toJson() => json.encode(toMap());
   Map<String, dynamic> serialize() => {
         'dir': dir,
-        'generators': generators.map((dynamic i) => i?.serialize()).toList(),
+        'generators': generators!.map((dynamic i) => i?.serialize()).toList(),
       };
 
-  factory Config.fromJson(String data) => Config.fromMap(json.decode(data));
+  static Config? fromJson(String data) => Config.fromMap(json.decode(data));
 }

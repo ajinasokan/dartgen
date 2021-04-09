@@ -31,7 +31,7 @@ class Person {
     dressColor = Color(_data['dress_color']);
   }
 
-  factory Person.fromMap(Map data) {
+  static Person? fromMap(Map data) {
     if (data == null) return null;
     return Person()..patch(data);
   }
@@ -50,5 +50,5 @@ class Person {
         'dressColor': dressColor?.value,
       };
 
-  factory Person.fromJson(String data) => Person.fromMap(json.decode(data));
+  static Person? fromJson(String data) => Person.fromMap(json.decode(data));
 }

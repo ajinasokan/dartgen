@@ -7,7 +7,7 @@ import 'package:dartgen/models/index.dart';
 void main(List<String> arguments) {
   final configFile = File('dartgen.json');
 
-  Config config;
+  Config? config;
   if (configFile.existsSync()) {
     config = Config.fromJson(configFile.readAsStringSync());
   } else {
@@ -27,14 +27,14 @@ Example config:
   }
 
   // generate constants first so that models can make use of it
-  config.generators.sort((a, b) => a.type == 'constant' ? -1 : 1);
+  config!.generators!.sort((a, b) => a.type == 'constant' ? -1 : 1);
 
-  EnumGenerator _lastEnumGen;
-  final generators = config.generators.map((config) {
-    Generator g;
+  EnumGenerator? _lastEnumGen;
+  final generators = config.generators!.map((config) {
+    Generator? g;
     if (config.type == 'constant') {
       g = EnumGenerator(config: config);
-      _lastEnumGen = g;
+      _lastEnumGen = g as EnumGenerator?;
     } else if (config.type == 'model') {
       g = ModelGenerator(config: config, enumGenerator: _lastEnumGen);
     } else if (config.type == 'index') {
@@ -43,7 +43,7 @@ Example config:
       g = FileEmbedGenerator(config: config);
     }
     try {
-      g.init();
+      g!.init();
     } catch (e, s) {
       print('Generator init failed with exception: $e $s');
     }
@@ -53,12 +53,12 @@ Example config:
   if (arguments.contains('watch')) watch(config, generators);
 }
 
-void watch(Config config, List<Generator> generators) {
-  var watcher = DirectoryWatcher(config.dir);
+void watch(Config config, List<Generator?> generators) {
+  var watcher = DirectoryWatcher(config.dir!);
 
   print('Watching changes..');
 
-  generators.forEach((g) => g.resetLastGenerated());
+  generators.forEach((g) => g!.resetLastGenerated());
 
   watcher.events.listen((event) {
     generators.forEach((g) {
