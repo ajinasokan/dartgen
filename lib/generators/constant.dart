@@ -45,7 +45,13 @@ class EnumGenerator extends Generator {
       var values = <String>[];
       var items = <String>[];
 
-      var methodsToDelete = <String>['==', '+', 'toString', 'hashCode'];
+      var methodsToDelete = <String>[
+        '==',
+        '+',
+        'toString',
+        'hashCode',
+        'parse'
+      ];
       var fieldsToDelete = <String>['value', 'keys', 'values', 'items'];
       classItem.members.forEach((field) {
         if (field is ConstructorDeclaration) {
@@ -73,6 +79,8 @@ static const items = <$enumName>[${items.join(",")}];
 
 final String value;
 const $enumName(this.value);
+
+static $enumName? parse(String? v) => v == null ? null : $enumName(v);
 
 @override
 bool operator ==(Object o) => o is $enumName && value == o.value;
