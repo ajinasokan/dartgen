@@ -5,6 +5,7 @@ run:
 .PHONY: test
 test:
 	cd test; dart dartgen_test.dart
+	cd test; dart generated_code_test.dart
 
 local:
 	pub global activate --source path .

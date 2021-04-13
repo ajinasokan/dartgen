@@ -3,20 +3,22 @@ import 'dart:convert';
 @pragma('model')
 class Address {
   @pragma('json:street')
-  String? street;
+  String street = '';
 
   Address({
-    this.street,
+    required this.street,
   });
 
+  Address.preset();
+
   void patch(Map? _data) {
-    if (_data == null) return null;
-    street = _data['street'];
+    if (_data == null) return;
+    street = _data['street'] ?? '';
   }
 
   static Address? fromMap(Map? data) {
     if (data == null) return null;
-    return Address()..patch(data);
+    return Address.preset()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {

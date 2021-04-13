@@ -9,14 +9,16 @@ class Store {
     this.street,
   });
 
+  Store.preset();
+
   void patch(Map? _data) {
-    if (_data == null) return null;
-    street = _data['street'];
+    if (_data == null) return;
+    street = _data['street'] ?? street;
   }
 
   static Store? fromMap(Map? data) {
     if (data == null) return null;
-    return Store()..patch(data);
+    return Store.preset()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {

@@ -3,5 +3,5 @@ import 'dart:convert';
 @pragma('model')
 class Address {
   @pragma('json:street')
-  String? street;
+  String street = '';
 }

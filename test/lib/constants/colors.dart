@@ -10,6 +10,8 @@ class Color {
   final String value;
   const Color(this.value);
 
+  static Color? parse(String? v) => v == null ? null : Color(v);
+
   @override
   bool operator ==(Object o) => o is Color && value == o.value;
 

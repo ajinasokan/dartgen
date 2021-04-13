@@ -11,7 +11,7 @@ class Person {
   int? age;
 
   @pragma('json:address')
-  Address? address;
+  Address address = Address.preset();
 
   @pragma('json:dress_color')
   Color? dressColor;

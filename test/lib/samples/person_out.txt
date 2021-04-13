@@ -11,7 +11,7 @@ class Person {
   int? age;
 
   @pragma('json:address')
-  Address? address;
+  Address address = Address.preset();
 
   @pragma('json:dress_color')
   Color? dressColor;
@@ -19,21 +19,23 @@ class Person {
   Person({
     this.name,
     this.age,
-    this.address,
+    required this.address,
     this.dressColor,
   });
 
+  Person.preset();
+
   void patch(Map? _data) {
-    if (_data == null) return null;
-    name = _data['name'];
-    age = _data['int'];
-    address = Address.fromMap(_data['address']);
-    dressColor = Color(_data['dress_color']);
+    if (_data == null) return;
+    name = _data['name'] ?? name;
+    age = _data['int'] ?? age;
+    address = Address.fromMap(_data['address']) ?? Address.preset();
+    dressColor = Color.parse(_data['dress_color']) ?? dressColor;
   }
 
   static Person? fromMap(Map? data) {
     if (data == null) return null;
-    return Person()..patch(data);
+    return Person.preset()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {
