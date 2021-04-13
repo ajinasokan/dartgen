@@ -3,18 +3,18 @@ import 'dart:convert';
 @pragma('model')
 class Address {
   @pragma('json:street')
-  String street;
+  String? street;
 
   Address({
     this.street,
   });
 
-  void patch(Map _data) {
+  void patch(Map? _data) {
     if (_data == null) return null;
     street = _data['street'];
   }
 
-  factory Address.fromMap(Map data) {
+  static Address? fromMap(Map? data) {
     if (data == null) return null;
     return Address()..patch(data);
   }
@@ -27,5 +27,5 @@ class Address {
         'street': street,
       };
 
-  factory Address.fromJson(String data) => Address.fromMap(json.decode(data));
+  static Address? fromJson(String data) => Address.fromMap(json.decode(data));
 }

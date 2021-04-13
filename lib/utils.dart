@@ -59,6 +59,10 @@ String getClassName(ClassDeclaration classdec) {
   return classdec.name.name;
 }
 
+bool isStatic(MethodDeclaration field) {
+  return field.isStatic;
+}
+
 String getMethodName(MethodDeclaration field) {
   return field.name.name;
 }
@@ -90,7 +94,8 @@ String getTag(Declaration i) {
 
   final annotation = i.metadata[0];
   if (annotation.name.toString() != 'pragma') return '';
-  SimpleStringLiteral val = annotation.arguments!.arguments[0] as SimpleStringLiteral;
+  SimpleStringLiteral val =
+      annotation.arguments!.arguments[0] as SimpleStringLiteral;
 
   return val.value;
 }
@@ -101,7 +106,8 @@ List<String> getTagArgs(Declaration i) {
   final annotation = i.metadata[0];
   if (annotation.name.toString() != 'pragma') return [];
   if (annotation.arguments!.arguments.length < 2) return [];
-  SimpleStringLiteral val = annotation.arguments!.arguments[1] as SimpleStringLiteral;
+  SimpleStringLiteral val =
+      annotation.arguments!.arguments[1] as SimpleStringLiteral;
 
   return val.value.split(',');
 }

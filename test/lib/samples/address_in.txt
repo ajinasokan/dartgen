@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-@pragma('model', 'patchWith,clone,serialize')
-class Store {
+@pragma('model')
+class Address {
   @pragma('json:street')
   String? street;
 }

@@ -5,16 +5,16 @@ import '../constants/colors.dart';
 @pragma('model')
 class Person {
   @pragma('json:name')
-  String name;
+  String? name;
 
   @pragma('json:int')
-  int age;
+  int? age;
 
   @pragma('json:address')
-  Address address;
+  Address? address;
 
   @pragma('json:dress_color')
-  Color dressColor;
+  Color? dressColor;
 
   Person({
     this.name,
@@ -23,7 +23,7 @@ class Person {
     this.dressColor,
   });
 
-  void patch(Map _data) {
+  void patch(Map? _data) {
     if (_data == null) return null;
     name = _data['name'];
     age = _data['int'];
@@ -31,7 +31,7 @@ class Person {
     dressColor = Color(_data['dress_color']);
   }
 
-  factory Person.fromMap(Map data) {
+  static Person? fromMap(Map? data) {
     if (data == null) return null;
     return Person()..patch(data);
   }
@@ -50,5 +50,5 @@ class Person {
         'dressColor': dressColor?.value,
       };
 
-  factory Person.fromJson(String data) => Person.fromMap(json.decode(data));
+  static Person? fromJson(String data) => Person.fromMap(json.decode(data));
 }

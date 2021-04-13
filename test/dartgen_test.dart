@@ -20,6 +20,10 @@ void main() {
 
   test('model generation', () {
     writeFile(
+      'lib/models/address.dart',
+      readFile('lib/samples/address_in.txt'),
+    );
+    writeFile(
       'lib/models/person.dart',
       readFile('lib/samples/person_in.txt'),
     );

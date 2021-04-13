@@ -88,22 +88,34 @@ class ModelGenerator extends Generator {
         'patchWith',
         'init',
       ];
+      var staticMethodsToDelete = <String>[
+        'fromMap',
+        'fromJson',
+        'clone',
+      ];
       var fieldsToDelete = <String>[];
       for (var member in fields) {
-        if (member is ConstructorDeclaration) {
-          // TODO: exclude user defined constructors
+        if (member is ConstructorDeclaration && member.name == null) {
           replacer.space(member.offset, member.length);
           continue;
-        } else if (member is FieldDeclaration &&
-            fieldsToDelete.contains(getFieldName(member))) {
+        } else if (member is MethodDeclaration &&
+            isStatic(member) &&
+            staticMethodsToDelete.contains(getMethodName(member))) {
           replacer.space(member.offset, member.length);
           continue;
         } else if (member is MethodDeclaration &&
             methodsToDelete.contains(getMethodName(member))) {
           replacer.space(member.offset, member.length);
           continue;
+        } else if (member is FieldDeclaration &&
+            fieldsToDelete.contains(getFieldName(member))) {
+          replacer.space(member.offset, member.length);
+          continue;
         } else if (member is FieldDeclaration) {
-          var type = member.fields.type.toString().replaceAll('\$', '');
+          var type = member.fields.type
+              .toString()
+              .replaceAll('\$', '')
+              .replaceAll('?', '');
           var name = member.fields.variables.first.name.name;
 
           constructor += 'this.$name,\n';
@@ -162,7 +174,7 @@ class ModelGenerator extends Generator {
               serialize += "'$name': $name,";
             } else {
               serialize +=
-                  "'$name': $name.map((k, v) => MapEntry(k$type1, v$type2)),";
+                  "'$name': $name?.map((k, v) => MapEntry(k$type1, v$type2)),";
             }
           } else if (type == 'Map') {
             serialize += "'$name': $name,";
@@ -174,10 +186,10 @@ class ModelGenerator extends Generator {
               serialize += "'$name': $name,";
             } else if (constants.contains(listPrimitive)) {
               serialize +=
-                  "'$name': $name.map((dynamic i) => i?.value).toList(),";
+                  "'$name': $name?.map((dynamic i) => i?.value).toList(),";
             } else {
               serialize +=
-                  "'$name': $name.map((dynamic i) => i?.serialize()).toList(),";
+                  "'$name': $name?.map((dynamic i) => i?.serialize()).toList(),";
             }
           } else {
             serialize += "'$name': $name?.serialize(),";
@@ -260,7 +272,7 @@ class ModelGenerator extends Generator {
       }
 
       output
-          .writeln('\nvoid patch(Map _data) { if(_data == null) return null;');
+          .writeln('\nvoid patch(Map? _data) { if(_data == null) return null;');
       if (usingToDouble) output.write(toDouble);
       if (usingToDecimal) output.write(toDecimal);
       output.write(patcher);
@@ -270,7 +282,7 @@ class ModelGenerator extends Generator {
       output.writeln('}');
 
       output.writeln(
-          '\static $className? fromMap(Map data) { if(data == null) return null; return $className()..patch(data); }');
+          '\static $className? fromMap(Map? data) { if(data == null) return null; return $className()..patch(data); }');
 
       output.writeln('\nMap<String, dynamic> toMap() => {');
       output.write(toMap);

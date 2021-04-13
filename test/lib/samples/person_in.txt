@@ -5,14 +5,14 @@ import '../constants/colors.dart';
 @pragma('model')
 class Person {
   @pragma('json:name')
-  String name;
+  String? name;
 
   @pragma('json:int')
-  int age;
+  int? age;
 
   @pragma('json:address')
-  Address address;
+  Address? address;
 
   @pragma('json:dress_color')
-  Color dressColor;
+  Color? dressColor;
 }

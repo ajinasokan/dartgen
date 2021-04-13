@@ -3,18 +3,18 @@ import 'dart:convert';
 @pragma('model', 'patchWith,clone,serialize')
 class Store {
   @pragma('json:street')
-  String street;
+  String? street;
 
   Store({
     this.street,
   });
 
-  void patch(Map _data) {
+  void patch(Map? _data) {
     if (_data == null) return null;
     street = _data['street'];
   }
 
-  factory Store.fromMap(Map data) {
+  static Store? fromMap(Map? data) {
     if (data == null) return null;
     return Store()..patch(data);
   }
@@ -31,9 +31,9 @@ class Store {
     street = clone.street;
   }
 
-  factory Store.clone(Store from) => Store(
+  static Store clone(Store from) => Store(
         street: from.street,
       );
 
-  factory Store.fromJson(String data) => Store.fromMap(json.decode(data));
+  static Store? fromJson(String data) => Store.fromMap(json.decode(data));
 }
