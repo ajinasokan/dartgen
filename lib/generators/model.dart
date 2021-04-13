@@ -66,7 +66,6 @@ class ModelGenerator extends Generator {
       var serialize = '';
       var toMap = '';
       var constructor = '';
-      var initializer = '';
       var usingToDouble = false;
       var usingToDecimal = false;
       final toDouble =
@@ -95,7 +94,8 @@ class ModelGenerator extends Generator {
       ];
       var fieldsToDelete = <String>[];
       for (var member in fields) {
-        if (member is ConstructorDeclaration && member.name == null) {
+        if (member is ConstructorDeclaration &&
+            (member.name == null || member.name.toString() == 'preset')) {
           replacer.space(member.offset, member.length);
           continue;
         } else if (member is MethodDeclaration &&
@@ -112,23 +112,22 @@ class ModelGenerator extends Generator {
           replacer.space(member.offset, member.length);
           continue;
         } else if (member is FieldDeclaration) {
-          var type = member.fields.type
+          final isNullable =
+              member.fields.type.toString().replaceAll('\$', '').contains('?');
+          final type = member.fields.type
               .toString()
               .replaceAll('\$', '')
               .replaceAll('?', '');
-          var name = member.fields.variables.first.name.name;
+          final name = member.fields.variables.first.name.name;
+          final initializer = member.fields.variables.first.initializer;
 
-          constructor += 'this.$name,\n';
           clone += '$name: from.$name,';
           patchWith += '$name = clone.$name;\n';
 
-          if (member.fields.variables.first.childEntities.length == 3) {
-            if (constants.contains(type)) {
-              initializer += 'if($name?.value == null) ';
-            } else {
-              initializer += 'if($name == null) ';
-            }
-            initializer += member.fields.variables.first.toString() + ';';
+          if (isNullable) {
+            constructor += 'this.$name,\n';
+          } else {
+            constructor += 'required this.$name,\n';
           }
 
           if (primitives.contains(type)) {
@@ -209,80 +208,72 @@ class ModelGenerator extends Generator {
             'List<dynamic>'
           ].contains(type)) {
             toMap += "'$key': $name,\n";
-            patcher += "$name = _data['$key'];\n";
+            patcher += "$name = _data['$key']";
           } else if (type == 'double') {
             toMap += "'$key': $name,\n";
-            patcher += "$name = toDouble(_data['$key']);\n";
+            patcher += "$name = toDouble(_data['$key'])";
             usingToDouble = true;
           } else if (type == 'Decimal') {
             toMap += "'$key': $name?.toDouble(),\n";
             usingToDecimal = true;
           } else if (constants.contains(type)) {
             toMap += "'$key': $name?.value,\n";
-            patcher += "$name = $type(_data['$key']);\n";
+            patcher += "$name = $type.parse(_data['$key'])";
           } else if (type.contains('Map<')) {
             var types = type.substring(4, type.lastIndexOf('>')).split(',');
             toMap += "'$key': $name,\n";
             patcher +=
-                "$name = _data['$key'].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}));\n";
+                "$name = _data['$key'].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}))";
           } else if (type.contains('List<')) {
             var listPrimitive =
                 type.replaceAll('List<', '').replaceAll('>', '');
             if (['String', 'num', 'bool', 'dynamic'].contains(listPrimitive)) {
               toMap += "'$key': $name,\n";
-              patcher += "$name = _data['$key']?.cast<$listPrimitive>();\n";
+              patcher += "$name = _data['$key']?.cast<$listPrimitive>()";
             } else if (listPrimitive == 'int') {
               toMap += "'$key': $name,\n";
               patcher +=
-                  "$name = _data['$key']?.map((i) => i ~/ 1)?.toList()?.cast<int>();\n";
+                  "$name = _data['$key']?.map((i) => i ~/ 1)?.toList()?.cast<int>()";
             } else if (listPrimitive == 'double') {
               toMap += "'$key': $name,\n";
               patcher +=
-                  "$name = _data['$key']?.map((i) => i * 1.0)?.toList()?.cast<double>();\n";
+                  "$name = _data['$key']?.map((i) => i * 1.0)?.toList()?.cast<double>()";
             } else if (constants.contains(listPrimitive)) {
               toMap += "'$key': $name?.map((i) => i.value)?.toList(),\n";
               patcher +=
-                  "$name = _data['$key']?.map((i) => new $listPrimitive(i))?.toList()?.cast<$listPrimitive>();\n";
+                  "$name = _data['$key']?.map((i) => $listPrimitive.parse(i))?.toList()?.cast<$listPrimitive>()";
             } else {
               toMap += "'$key': $name?.map((i) => i.toMap())?.toList(),\n";
               patcher +=
-                  "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i))?.toList()?.cast<$listPrimitive>();\n";
+                  "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i))?.toList()?.cast<$listPrimitive>()";
             }
           } else {
             toMap += "'$key': $name?.toMap(),";
-            patcher += "$name = $type.fromMap(_data['$key']);\n";
+            patcher += "$name = $type.fromMap(_data['$key'])";
           }
+
+          patcher += ' ?? ${initializer ?? name};\n';
         }
       }
 
       if (constructor.isNotEmpty) {
         output.writeln('\n$className({');
         output.write(constructor);
-        output.writeln('})');
-        if (initializer.isNotEmpty) {
-          output.writeln('{ init(); }\n');
-          output.writeln('void init() {');
-          output.writeln(initializer);
-          output.writeln('}');
-        } else {
-          output.writeln(';');
-        }
+        output.writeln('});');
       } else {
         output.writeln('\n$className();');
       }
 
-      output
-          .writeln('\nvoid patch(Map? _data) { if(_data == null) return null;');
+      output.writeln('\n$className.preset();');
+
+      output.writeln('\nvoid patch(Map? _data) { if(_data == null) return;');
       if (usingToDouble) output.write(toDouble);
       if (usingToDecimal) output.write(toDecimal);
       output.write(patcher);
-      if (initializer.isNotEmpty) {
-        output.writeln('init();');
-      }
       output.writeln('}');
 
       output.writeln(
-          '\static $className? fromMap(Map? data) { if(data == null) return null; return $className()..patch(data); }');
+          '\static $className? fromMap(Map? data) { if(data == null) return null; return $className.preset()..patch(data); }');
 
       output.writeln('\nMap<String, dynamic> toMap() => {');
       output.write(toMap);
