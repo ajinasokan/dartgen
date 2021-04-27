@@ -26,7 +26,7 @@ void main() {
   });
 
   test('model encode', () {
-    expect(Person.preset().toJson(),
+    expect(Person().toJson(),
         '{"name":null,"int":null,"address":{"street":""},"dress_color":null}');
   });
 

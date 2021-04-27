@@ -5,11 +5,11 @@ class Address {
   @pragma('json:street')
   String street = '';
 
-  Address({
+  Address();
+
+  Address.build({
     required this.street,
   });
-
-  Address.preset();
 
   void patch(Map? _data) {
     if (_data == null) return;
@@ -18,7 +18,7 @@ class Address {
 
   static Address? fromMap(Map? data) {
     if (data == null) return null;
-    return Address.preset()..patch(data);
+    return Address()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {

@@ -5,11 +5,11 @@ class Store {
   @pragma('json:street')
   String? street;
 
-  Store({
+  Store();
+
+  Store.build({
     this.street,
   });
-
-  Store.preset();
 
   void patch(Map? _data) {
     if (_data == null) return;
@@ -18,7 +18,7 @@ class Store {
 
   static Store? fromMap(Map? data) {
     if (data == null) return null;
-    return Store.preset()..patch(data);
+    return Store()..patch(data);
   }
 
   Map<String, dynamic> toMap() => {
@@ -33,7 +33,7 @@ class Store {
     street = clone.street;
   }
 
-  static Store clone(Store from) => Store(
+  static Store clone(Store from) => Store.build(
         street: from.street,
       );
 

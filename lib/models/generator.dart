@@ -14,26 +14,21 @@ class GeneratorConfig {
   @pragma('json:output_file')
   String? outputFile;
 
-  GeneratorConfig({
+  GeneratorConfig();
+
+  GeneratorConfig.build({
     this.dir,
     this.type,
     this.recursive,
     this.outputFile,
-  }) {
-    init();
-  }
+  });
 
-  void init() {
-    if (recursive == null) recursive = false;
-  }
-
-  void patch(Map _data) {
-    if (_data == null) return null;
-    dir = _data['dir'];
-    type = _data['type'];
-    recursive = _data['recursive'];
-    outputFile = _data['output_file'];
-    init();
+  void patch(Map? _data) {
+    if (_data == null) return;
+    dir = _data['dir'] ?? dir;
+    type = _data['type'] ?? type;
+    recursive = _data['recursive'] ?? false;
+    outputFile = _data['output_file'] ?? outputFile;
   }
 
   static GeneratorConfig? fromMap(Map? data) {

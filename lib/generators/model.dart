@@ -95,7 +95,7 @@ class ModelGenerator extends Generator {
       var fieldsToDelete = <String>[];
       for (var member in fields) {
         if (member is ConstructorDeclaration &&
-            (member.name == null || member.name.toString() == 'preset')) {
+            (member.name == null || member.name.toString() == 'build')) {
           replacer.space(member.offset, member.length);
           continue;
         } else if (member is MethodDeclaration &&
@@ -191,7 +191,11 @@ class ModelGenerator extends Generator {
                   "'$name': $name?.map((dynamic i) => i?.serialize()).toList(),";
             }
           } else {
-            serialize += "'$name': $name?.serialize(),";
+            if (isNullable) {
+              serialize += "'$name': $name?.serialize(),";
+            } else {
+              serialize += "'$name': $name.serialize(),";
+            }
           }
 
           if (!getTag(member).contains('json')) continue;
@@ -248,7 +252,11 @@ class ModelGenerator extends Generator {
                   "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i))?.toList()?.cast<$listPrimitive>()";
             }
           } else {
-            toMap += "'$key': $name?.toMap(),";
+            if (isNullable) {
+              toMap += "'$key': $name?.toMap(),";
+            } else {
+              toMap += "'$key': $name.toMap(),";
+            }
             patcher += "$name = $type.fromMap(_data['$key'])";
           }
 
@@ -256,15 +264,15 @@ class ModelGenerator extends Generator {
         }
       }
 
+      output.writeln('\n$className();');
+
       if (constructor.isNotEmpty) {
-        output.writeln('\n$className({');
+        output.writeln('\n$className.build({');
         output.write(constructor);
         output.writeln('});');
       } else {
         output.writeln('\n$className();');
       }
-
-      output.writeln('\n$className.preset();');
 
       output.writeln('\nvoid patch(Map? _data) { if(_data == null) return;');
       if (usingToDouble) output.write(toDouble);
@@ -273,7 +281,7 @@ class ModelGenerator extends Generator {
       output.writeln('}');
 
       output.writeln(
-          '\static $className? fromMap(Map? data) { if(data == null) return null; return $className.preset()..patch(data); }');
+          '\static $className? fromMap(Map? data) { if(data == null) return null; return $className()..patch(data); }');
 
       output.writeln('\nMap<String, dynamic> toMap() => {');
       output.write(toMap);
@@ -285,7 +293,7 @@ class ModelGenerator extends Generator {
       }
       if (metaArgs.contains('clone')) {
         output.writeln(
-            '\static $className clone($className from) => $className($clone);');
+            '\static $className clone($className from) => $className.build($clone);');
       }
       output.writeln(extraCode);
       output.writeln(

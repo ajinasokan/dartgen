@@ -9,25 +9,21 @@ class Config {
   @pragma('json:generators')
   List<GeneratorConfig>? generators = [];
 
-  Config({
+  Config();
+
+  Config.build({
     this.dir,
     this.generators,
-  }) {
-    init();
-  }
+  });
 
-  void init() {
-    if (generators == null) generators = [];
-  }
-
-  void patch(Map _data) {
-    if (_data == null) return null;
-    dir = _data['dir'];
-    generators = (_data['generators'] ?? [])
-        .map((i) => GeneratorConfig.fromMap(i))
-        .toList()
-        .cast<GeneratorConfig>();
-    init();
+  void patch(Map? _data) {
+    if (_data == null) return;
+    dir = _data['dir'] ?? dir;
+    generators = _data['generators']
+            ?.map((i) => GeneratorConfig.fromMap(i))
+            ?.toList()
+            ?.cast<GeneratorConfig>() ??
+        [];
   }
 
   static Config? fromMap(Map? data) {
@@ -42,7 +38,7 @@ class Config {
   String toJson() => json.encode(toMap());
   Map<String, dynamic> serialize() => {
         'dir': dir,
-        'generators': generators!.map((dynamic i) => i?.serialize()).toList(),
+        'generators': generators?.map((dynamic i) => i?.serialize()).toList(),
       };
 
   static Config? fromJson(String data) => Config.fromMap(json.decode(data));
