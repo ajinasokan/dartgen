@@ -13,6 +13,7 @@ class Store {
 
   void patch(Map? _data) {
     if (_data == null) return;
+
     street = _data['street'] ?? street;
   }
 
@@ -25,17 +26,14 @@ class Store {
         'street': street,
       };
   String toJson() => json.encode(toMap());
+  static Store? fromJson(String data) => Store.fromMap(json.decode(data));
   Map<String, dynamic> serialize() => {
         'street': street,
       };
-
-  void patchWith(Store clone) {
-    street = clone.street;
-  }
-
   static Store clone(Store from) => Store.build(
         street: from.street,
       );
-
-  static Store? fromJson(String data) => Store.fromMap(json.decode(data));
+  void patchWith(Store clone) {
+    street = clone.street;
+  }
 }

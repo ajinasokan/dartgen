@@ -13,6 +13,7 @@ class Address {
 
   void patch(Map? _data) {
     if (_data == null) return;
+
     street = _data['street'] ?? '';
   }
 
@@ -25,9 +26,8 @@ class Address {
         'street': street,
       };
   String toJson() => json.encode(toMap());
+  static Address? fromJson(String data) => Address.fromMap(json.decode(data));
   Map<String, dynamic> serialize() => {
         'street': street,
       };
-
-  static Address? fromJson(String data) => Address.fromMap(json.decode(data));
 }

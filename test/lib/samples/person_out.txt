@@ -27,6 +27,7 @@ class Person {
 
   void patch(Map? _data) {
     if (_data == null) return;
+
     name = _data['name'] ?? name;
     age = _data['int'] ?? age;
     address = Address.fromMap(_data['address']) ?? Address();
@@ -45,12 +46,11 @@ class Person {
         'dress_color': dressColor?.value,
       };
   String toJson() => json.encode(toMap());
+  static Person? fromJson(String data) => Person.fromMap(json.decode(data));
   Map<String, dynamic> serialize() => {
         'name': name,
         'age': age,
         'address': address.serialize(),
         'dressColor': dressColor?.value,
       };
-
-  static Person? fromJson(String data) => Person.fromMap(json.decode(data));
 }
