@@ -260,7 +260,6 @@ class SerializeFields extends _FieldProcessor {
 
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
-      if (!getTag(member).contains('json')) continue;
 
       final isNullable = member.fields.type.toString().contains('?');
       final type = member.fields.type
