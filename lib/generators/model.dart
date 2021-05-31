@@ -176,26 +176,28 @@ class MapOfFields extends _FieldProcessor {
         patcher +=
             "$name = _data['$key'].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}))";
       } else if (type.contains('List<')) {
-        var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
+        final listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
+        final isPrimitiveNullable = listPrimitive.endsWith('?');
+        final toList = isPrimitiveNullable ? '?.toList()' : '.toList()';
         if (['String', 'num', 'bool', 'dynamic'].contains(listPrimitive)) {
           toMap += "'$key': $name,\n";
           patcher += "$name = _data['$key']?.cast<$listPrimitive>()";
         } else if (listPrimitive == 'int') {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => i ~/ 1)?.toList()?.cast<int>()";
+              "$name = _data['$key']?.map((i) => i ~/ 1)$toList.cast<int>()";
         } else if (listPrimitive == 'double') {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => i * 1.0)?.toList()?.cast<double>()";
+              "$name = _data['$key']?.map((i) => i * 1.0)$toList.cast<double>()";
         } else if (enums.contains(listPrimitive)) {
-          toMap += "'$key': $name?.map((i) => i.value)?.toList(),\n";
+          toMap += "'$key': $name?.map((i) => i.value)$toList,\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => $listPrimitive.parse(i))?.toList()?.cast<$listPrimitive>()";
+              "$name = _data['$key']?.map((i) => $listPrimitive.parse(i))$toList.cast<$listPrimitive>()";
         } else {
-          toMap += "'$key': $name?.map((i) => i.toMap())?.toList(),\n";
+          toMap += "'$key': $name?.map((i) => i.toMap())$toList,\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i))?.toList()?.cast<$listPrimitive>()";
+              "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i))$toList.cast<$listPrimitive>()";
         }
       } else {
         if (isNullable) {
@@ -312,7 +314,7 @@ class SerializeFields extends _FieldProcessor {
           serialize += "'$name': $name,";
         } else {
           serialize +=
-              "'$name': $name?.map((k, v) => MapEntry(k$type1, v$type2)),";
+              "'$name': $name?.map((dynamic k, dynamic v) => MapEntry(k$type1, v$type2)),";
         }
       } else if (type == 'Map') {
         serialize += "'$name': $name,";
