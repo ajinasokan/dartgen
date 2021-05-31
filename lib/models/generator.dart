@@ -25,6 +25,7 @@ class GeneratorConfig {
 
   void patch(Map? _data) {
     if (_data == null) return;
+
     dir = _data['dir'] ?? dir;
     type = _data['type'] ?? type;
     recursive = _data['recursive'] ?? false;
@@ -43,13 +44,12 @@ class GeneratorConfig {
         'output_file': outputFile,
       };
   String toJson() => json.encode(toMap());
+  static GeneratorConfig? fromJson(String data) =>
+      GeneratorConfig.fromMap(json.decode(data));
   Map<String, dynamic> serialize() => {
         'dir': dir,
         'type': type,
         'recursive': recursive,
         'outputFile': outputFile,
       };
-
-  static GeneratorConfig? fromJson(String data) =>
-      GeneratorConfig.fromMap(json.decode(data));
 }

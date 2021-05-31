@@ -165,6 +165,7 @@ class MapOfFields extends _FieldProcessor {
         usingToDouble = true;
       } else if (type == 'Decimal') {
         toMap += "'$key': $name?.toDouble(),\n";
+        patcher += "$name = toDecimal(_data['$key'])";
         usingToDecimal = true;
       } else if (enums.contains(type)) {
         toMap += "'$key': $name?.value,\n";

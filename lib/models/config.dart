@@ -18,6 +18,7 @@ class Config {
 
   void patch(Map? _data) {
     if (_data == null) return;
+
     dir = _data['dir'] ?? dir;
     generators = _data['generators']
             ?.map((i) => GeneratorConfig.fromMap(i))
@@ -36,10 +37,9 @@ class Config {
         'generators': generators?.map((i) => i.toMap())?.toList(),
       };
   String toJson() => json.encode(toMap());
+  static Config? fromJson(String data) => Config.fromMap(json.decode(data));
   Map<String, dynamic> serialize() => {
         'dir': dir,
         'generators': generators?.map((dynamic i) => i?.serialize()).toList(),
       };
-
-  static Config? fromJson(String data) => Config.fromMap(json.decode(data));
 }
