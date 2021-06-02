@@ -1,6 +1,6 @@
-import 'package:dartgen/generators/generator.dart';
-import 'package:dartgen/models/index.dart';
 import 'package:path/path.dart' as p;
+import '../generators/generator.dart';
+import '../models/index.dart';
 import '../utils.dart';
 
 class FileIndexGenerator extends Generator {

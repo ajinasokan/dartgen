@@ -4,7 +4,7 @@ Take following file structure:
 
 ```
 .
-├── dartgen.json
+├── dartgenerate.json
 └── lib
     ├── constants
     │   └── colors.dart
@@ -16,7 +16,7 @@ Take following file structure:
         └── person.dart
 ```
 
-Contents of `dartgen.json`:
+Contents of `dartgenerate.json`:
 
 ```json
 {

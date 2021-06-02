@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:async';
 import '../bin/main.dart' as bin;
-import 'package:dartgen/dartgen.dart';
-import 'package:dartgen/models/index.dart';
 import 'package:test/test.dart';
 
 void main() {

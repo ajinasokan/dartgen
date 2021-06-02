@@ -1,7 +1,6 @@
-import 'package:dartgen/dartgen.dart';
-import 'package:dartgen/generators/generator.dart';
-import 'package:dartgen/models/index.dart';
-
+import '../dartgenerate.dart';
+import '../generators/generator.dart';
+import '../models/index.dart';
 import '../utils.dart';
 import '../code_replacer.dart';
 

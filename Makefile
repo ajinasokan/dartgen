@@ -12,3 +12,9 @@ local:
 
 git:
 	pub global activate --source git https://github.com/ajinasokan/dartgen
+
+pub:
+	pub global activate dartgenerate
+
+deactivate-old:
+	pub global deactivate dartgen

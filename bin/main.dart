@@ -1,17 +1,17 @@
 import 'dart:io';
-import 'package:dartgen/generators/generator.dart';
 import 'package:watcher/watcher.dart';
-import 'package:dartgen/dartgen.dart';
-import 'package:dartgen/models/index.dart';
+import 'package:dartgenerate/generators/generator.dart';
+import 'package:dartgenerate/dartgenerate.dart';
+import 'package:dartgenerate/models/index.dart';
 
 void main(List<String> arguments) {
-  final configFile = File('dartgen.json');
+  final configFile = File('dartgenerate.json');
 
   Config? config;
   if (configFile.existsSync()) {
     config = Config.fromJson(configFile.readAsStringSync());
   } else {
-    print("""No dartgen.json found in this directory.
+    print('''No dartgenerate.json found in this directory.
 
 Example config:
 {
@@ -22,7 +22,7 @@ Example config:
       { "dir": "lib/constants", "type": "constant" },
       { "dir": "lib/constants", "type": "index" },
   ],
-}""");
+}''');
     return;
   }
 

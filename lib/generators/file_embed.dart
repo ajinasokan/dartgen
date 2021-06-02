@@ -1,13 +1,10 @@
-import 'package:analyzer/dart/analysis/utilities.dart';
-import 'package:analyzer/dart/ast/token.dart';
-import 'package:dartgen/generators/generator.dart';
-import 'package:dartgen/models/index.dart';
-import 'package:path/path.dart' as p;
-import '../utils.dart';
-import 'package:analyzer/src/dart/ast/ast.dart';
 import 'dart:io';
 import 'package:strings/strings.dart' as strings;
 import 'package:slugify/slugify.dart';
+import 'package:path/path.dart' as p;
+import '../models/index.dart';
+import '../generators/generator.dart';
+import '../utils.dart';
 
 class FileEmbedGenerator extends Generator {
   final GeneratorConfig? config;
