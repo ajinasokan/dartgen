@@ -55,9 +55,10 @@ class ModelGenerator extends Generator {
         ConstructFields(className: className),
         MapOfFields(className: className, enums: enums),
         JsonOfFields(className: className),
-        if (metaArgs.contains('serialize')) SerializeFields(enums: enums),
-        if (metaArgs.contains('clone')) CloneFields(className: className),
-        if (metaArgs.contains('patchWith')) PatchFields(className: className),
+        SerializeFields(enums: enums),
+        CloneFields(className: className, enabled: metaArgs.contains('clone')),
+        PatchFields(
+            className: className, enabled: metaArgs.contains('patchWith')),
       ];
 
       for (var process in processes) {
@@ -348,14 +349,18 @@ class SerializeFields extends _FieldProcessor {
 
 class CloneFields extends _FieldProcessor {
   final String className;
+  final bool enabled;
 
   CloneFields({
     required this.className,
+    required this.enabled,
   });
 
   @override
   String generate(List<ClassMember> members) {
     var clone = '';
+    if (!enabled) return clone;
+
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
       final name = member.fields.variables.first.name.name;
@@ -372,14 +377,18 @@ class CloneFields extends _FieldProcessor {
 
 class PatchFields extends _FieldProcessor {
   final String className;
+  final bool enabled;
 
   PatchFields({
     required this.className,
+    required this.enabled,
   });
 
   @override
   String generate(List<ClassMember> members) {
     var patchWith = '';
+    if (!enabled) return patchWith;
+
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
       final name = member.fields.variables.first.name.name;

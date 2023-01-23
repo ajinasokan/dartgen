@@ -46,10 +46,4 @@ class GeneratorConfig {
   String toJson() => json.encode(toMap());
   static GeneratorConfig? fromJson(String data) =>
       GeneratorConfig.fromMap(json.decode(data));
-  Map<String, dynamic> serialize() => {
-        'dir': dir,
-        'type': type,
-        'recursive': recursive,
-        'outputFile': outputFile,
-      };
 }

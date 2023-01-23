@@ -38,8 +38,4 @@ class Config {
       };
   String toJson() => json.encode(toMap());
   static Config? fromJson(String data) => Config.fromMap(json.decode(data));
-  Map<String, dynamic> serialize() => {
-        'dir': dir,
-        'generators': generators?.map((dynamic i) => i?.serialize()).toList(),
-      };
 }
