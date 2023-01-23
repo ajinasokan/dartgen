@@ -94,8 +94,7 @@ String getTag(Declaration i) {
 
   final annotation = i.metadata[0];
   if (annotation.name.toString() != 'pragma') return '';
-  SimpleStringLiteral val =
-      annotation.arguments!.arguments[0] as SimpleStringLiteral;
+  final val = annotation.arguments!.arguments[0] as SimpleStringLiteral;
 
   return val.value;
 }
@@ -106,8 +105,7 @@ List<String> getTagArgs(Declaration i) {
   final annotation = i.metadata[0];
   if (annotation.name.toString() != 'pragma') return [];
   if (annotation.arguments!.arguments.length < 2) return [];
-  SimpleStringLiteral val =
-      annotation.arguments!.arguments[1] as SimpleStringLiteral;
+  final val = annotation.arguments!.arguments[1] as SimpleStringLiteral;
 
   return val.value.split(',');
 }

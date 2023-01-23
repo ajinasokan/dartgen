@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:watcher/watcher.dart';
-import 'package:dartgenerate/generators/generator.dart';
 import 'package:dartgenerate/dartgenerate.dart';
 import 'package:dartgenerate/models/index.dart';
 

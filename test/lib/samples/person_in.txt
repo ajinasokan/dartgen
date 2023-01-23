@@ -10,8 +10,11 @@ class Person {
   @pragma('json:int')
   int? age;
 
-  @pragma('json:address')
-  Address address = Address();
+  @pragma('json:addresses')
+  List<Address> addresses = [];
+
+  @pragma('json:new_addresses')
+  List<Address>? newAddresses = [];
 
   @pragma('json:dress_color')
   Color? dressColor;

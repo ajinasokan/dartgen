@@ -1,7 +1,5 @@
 import '../dartgenerate.dart';
-import '../generators/generator.dart';
 import '../models/index.dart';
-import '../utils.dart';
 import '../code_replacer.dart';
 
 class ModelGenerator extends Generator {
@@ -57,7 +55,7 @@ class ModelGenerator extends Generator {
         ConstructFields(className: className),
         MapOfFields(className: className, enums: enums),
         JsonOfFields(className: className),
-        SerializeFields(enums: enums),
+        if (metaArgs.contains('serialize')) SerializeFields(enums: enums),
         if (metaArgs.contains('clone')) CloneFields(className: className),
         if (metaArgs.contains('patchWith')) PatchFields(className: className),
       ];
@@ -176,27 +174,26 @@ class MapOfFields extends _FieldProcessor {
             "$name = _data['$key'].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}))";
       } else if (type.contains('List<')) {
         final listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
-        final isPrimitiveNullable = listPrimitive.endsWith('?');
-        final toList = isPrimitiveNullable ? '?.toList()' : '.toList()';
+        final dot = isNullable ? '?.' : '.';
         if (['String', 'num', 'bool', 'dynamic'].contains(listPrimitive)) {
           toMap += "'$key': $name,\n";
           patcher += "$name = _data['$key']?.cast<$listPrimitive>()";
         } else if (listPrimitive == 'int') {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => i ~/ 1)$toList.cast<int>()";
+              "$name = _data['$key']${dot}map((i) => i ~/ 1).toList().cast<int>()";
         } else if (listPrimitive == 'double') {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => i * 1.0)$toList.cast<double>()";
+              "$name = _data['$key']${dot}map((i) => i * 1.0).toList().cast<double>()";
         } else if (enums.contains(listPrimitive)) {
-          toMap += "'$key': $name?.map((i) => i.value)$toList,\n";
+          toMap += "'$key': $name${dot}map((i) => i.value).toList(),\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => $listPrimitive.parse(i))$toList.cast<$listPrimitive>()";
+              "$name = _data['$key']${dot}map((i) => $listPrimitive.parse(i)).toList().cast<$listPrimitive>()";
         } else {
-          toMap += "'$key': $name?.map((i) => i.toMap())$toList,\n";
+          toMap += "'$key': $name${dot}map((i) => i.toMap()).toList(),\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i))$toList.cast<$listPrimitive>()";
+              "$name = _data['$key']${dot}map((i) => $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>()";
         }
       } else {
         if (isNullable) {
@@ -264,6 +261,7 @@ class SerializeFields extends _FieldProcessor {
       if (!(member is FieldDeclaration)) continue;
 
       final isNullable = member.fields.type.toString().contains('?');
+      final dot = isNullable ? '?.' : '.';
       final type = member.fields.type
           .toString()
           .replaceAll('\$', '')
@@ -277,9 +275,9 @@ class SerializeFields extends _FieldProcessor {
       } else if (type == 'double') {
         serialize += "'$name': $name,";
       } else if (type == 'Decimal') {
-        serialize += "'$name': $name?.toDouble(),";
+        serialize += "'$name': $name${dot}toDouble(),";
       } else if (enums.contains(type)) {
-        serialize += "'$name': $name?.value,";
+        serialize += "'$name': $name${dot}value,";
       } else if (type.contains('Map<')) {
         var types = type
             .substring(4, type.lastIndexOf('>'))
@@ -318,15 +316,17 @@ class SerializeFields extends _FieldProcessor {
       } else if (type == 'Map') {
         serialize += "'$name': $name,";
       } else if (type.contains('List<')) {
-        var listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
+        final dotMap = isNullable ? '?.map' : '.map';
+        final listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
 
         if (primitives.contains(listPrimitive)) {
           serialize += "'$name': $name,";
         } else if (enums.contains(listPrimitive)) {
-          serialize += "'$name': $name?.map((dynamic i) => i?.value).toList(),";
+          serialize +=
+              "'$name': $name$dotMap((dynamic i) => i?.value).toList(),";
         } else {
           serialize +=
-              "'$name': $name?.map((dynamic i) => i?.serialize()).toList(),";
+              "'$name': $name$dotMap((dynamic i) => i?.serialize()).toList(),";
         }
       } else {
         if (isNullable) {

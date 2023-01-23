@@ -8,13 +8,13 @@ test:
 	cd test; dart generated_code_test.dart
 
 local:
-	pub global activate --source path .
+	dart pub global activate --source path .
 
 git:
-	pub global activate --source git https://github.com/ajinasokan/dartgen
+	dart pub global activate --source git https://github.com/ajinasokan/dartgen
 
 pub:
-	pub global activate dartgenerate
+	dart pub global activate dartgenerate
 
 deactivate-old:
-	pub global deactivate dartgen
+	dart pub global deactivate dartgen

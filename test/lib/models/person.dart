@@ -10,8 +10,11 @@ class Person {
   @pragma('json:int')
   int? age;
 
-  @pragma('json:address')
-  Address address = Address();
+  @pragma('json:addresses')
+  List<Address> addresses = [];
+
+  @pragma('json:new_addresses')
+  List<Address>? newAddresses = [];
 
   @pragma('json:dress_color')
   Color? dressColor;
@@ -21,7 +24,8 @@ class Person {
   Person.build({
     this.name,
     this.age,
-    required this.address,
+    required this.addresses,
+    this.newAddresses,
     this.dressColor,
   });
 
@@ -30,7 +34,16 @@ class Person {
 
     name = _data['name'] ?? name;
     age = _data['int'] ?? age;
-    address = Address.fromMap(_data['address']) ?? Address();
+    addresses = _data['addresses']
+            .map((i) => Address.fromMap(i))
+            .toList()
+            .cast<Address>() ??
+        [];
+    newAddresses = _data['new_addresses']
+            ?.map((i) => Address.fromMap(i))
+            .toList()
+            .cast<Address>() ??
+        [];
     dressColor = Color.parse(_data['dress_color']) ?? dressColor;
   }
 
@@ -42,15 +55,10 @@ class Person {
   Map<String, dynamic> toMap() => {
         'name': name,
         'int': age,
-        'address': address.toMap(),
+        'addresses': addresses.map((i) => i.toMap()).toList(),
+        'new_addresses': newAddresses?.map((i) => i.toMap()).toList(),
         'dress_color': dressColor?.value,
       };
   String toJson() => json.encode(toMap());
   static Person? fromJson(String data) => Person.fromMap(json.decode(data));
-  Map<String, dynamic> serialize() => {
-        'name': name,
-        'age': age,
-        'address': address.serialize(),
-        'dressColor': dressColor?.value,
-      };
 }

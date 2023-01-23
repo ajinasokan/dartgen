@@ -27,14 +27,15 @@ void main() {
 
   test('model encode', () {
     expect(Person().toJson(),
-        '{"name":null,"int":null,"address":{"street":""},"dress_color":null}');
+        '{"name":null,"int":null,"addresses":[],"new_addresses":[],"dress_color":null}');
   });
 
   test('model decode', () {
     expect(
         Person.fromJson(
-                '{"name":null,"int":null,"address":{"street":"street"},"dress_color":null}')!
-            .address
+                '{"name":null,"int":null,"addresses":[{"street":"street"}],"dress_color":null}')!
+            .addresses
+            .first
             .street,
         'street');
   });

@@ -22,8 +22,8 @@ class Config {
     dir = _data['dir'] ?? dir;
     generators = _data['generators']
             ?.map((i) => GeneratorConfig.fromMap(i))
-            ?.toList()
-            ?.cast<GeneratorConfig>() ??
+            .toList()
+            .cast<GeneratorConfig>() ??
         [];
   }
 
@@ -34,7 +34,7 @@ class Config {
 
   Map<String, dynamic> toMap() => {
         'dir': dir,
-        'generators': generators?.map((i) => i.toMap())?.toList(),
+        'generators': generators?.map((i) => i.toMap()).toList(),
       };
   String toJson() => json.encode(toMap());
   static Config? fromJson(String data) => Config.fromMap(json.decode(data));
