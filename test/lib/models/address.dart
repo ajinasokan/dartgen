@@ -27,4 +27,7 @@ class Address {
       };
   String toJson() => json.encode(toMap());
   static Address? fromJson(String data) => Address.fromMap(json.decode(data));
+  Map<String, dynamic> serialize() => {
+        'street': street,
+      };
 }

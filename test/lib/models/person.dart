@@ -35,7 +35,7 @@ class Person {
     name = _data['name'] ?? name;
     age = _data['int'] ?? age;
     addresses = _data['addresses']
-            .map((i) => Address.fromMap(i))
+            ?.map((i) => Address.fromMap(i))
             .toList()
             .cast<Address>() ??
         [];
@@ -61,4 +61,12 @@ class Person {
       };
   String toJson() => json.encode(toMap());
   static Person? fromJson(String data) => Person.fromMap(json.decode(data));
+  Map<String, dynamic> serialize() => {
+        'name': name,
+        'age': age,
+        'addresses': addresses.map((dynamic i) => i?.serialize()).toList(),
+        'newAddresses':
+            newAddresses?.map((dynamic i) => i?.serialize()).toList(),
+        'dressColor': dressColor?.value,
+      };
 }

@@ -139,6 +139,7 @@ class MapOfFields extends _FieldProcessor {
 
       final key = getTag(member).split(':')[1].replaceAll('"', '');
       final isNullable = member.fields.type.toString().contains('?');
+      final dot = isNullable ? '?.' : '.';
       final type = member.fields.type
           .toString()
           .replaceAll('\$', '')
@@ -162,11 +163,11 @@ class MapOfFields extends _FieldProcessor {
         patcher += "$name = toDouble(_data['$key'])";
         usingToDouble = true;
       } else if (type == 'Decimal') {
-        toMap += "'$key': $name?.toDouble(),\n";
+        toMap += "'$key': $name${dot}toDouble(),\n";
         patcher += "$name = toDecimal(_data['$key'])";
         usingToDecimal = true;
       } else if (enums.contains(type)) {
-        toMap += "'$key': $name?.value,\n";
+        toMap += "'$key': $name${dot}value,\n";
         patcher += "$name = $type.parse(_data['$key'])";
       } else if (type.contains('Map<')) {
         var types = type.substring(4, type.lastIndexOf('>')).split(',');
@@ -175,33 +176,28 @@ class MapOfFields extends _FieldProcessor {
             "$name = _data['$key'].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}))";
       } else if (type.contains('List<')) {
         final listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
-        final dot = isNullable ? '?.' : '.';
         if (['String', 'num', 'bool', 'dynamic'].contains(listPrimitive)) {
           toMap += "'$key': $name,\n";
           patcher += "$name = _data['$key']?.cast<$listPrimitive>()";
         } else if (listPrimitive == 'int') {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']${dot}map((i) => i ~/ 1).toList().cast<int>()";
+              "$name = _data['$key']?.map((i) => i ~/ 1).toList().cast<int>()";
         } else if (listPrimitive == 'double') {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']${dot}map((i) => i * 1.0).toList().cast<double>()";
+              "$name = _data['$key']?.map((i) => i * 1.0).toList().cast<double>()";
         } else if (enums.contains(listPrimitive)) {
           toMap += "'$key': $name${dot}map((i) => i.value).toList(),\n";
           patcher +=
-              "$name = _data['$key']${dot}map((i) => $listPrimitive.parse(i)).toList().cast<$listPrimitive>()";
+              "$name = _data['$key']?.map((i) => $listPrimitive.parse(i)).toList().cast<$listPrimitive>()";
         } else {
           toMap += "'$key': $name${dot}map((i) => i.toMap()).toList(),\n";
           patcher +=
-              "$name = _data['$key']${dot}map((i) => $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>()";
+              "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>()";
         }
       } else {
-        if (isNullable) {
-          toMap += "'$key': $name?.toMap(),";
-        } else {
-          toMap += "'$key': $name.toMap(),";
-        }
+        toMap += "'$key': $name${dot}toMap(),";
         patcher += "$name = $type.fromMap(_data['$key'])";
       }
 
