@@ -1,3 +1,5 @@
 final eulatxt = 'MIT License';
+final eulazip =
+    'PK\u0003\u0004\n\u0000\u0000\u0000\u0000\u0000�m4V����\u000b\u0000\u0000\u0000\u000b\u0000\u0000\u0000\u0008\u0000\u001c\u0000EULA.txtUT\t\u0000\u0003zM�cWP�cux\u000b\u0000\u0001\u0004�\u0001\u0000\u0000\u0004\u0014\u0000\u0000\u0000MIT LicensePK\u0001\u0002\u001e\u0003\n\u0000\u0000\u0000\u0000\u0000�m4V����\u000b\u0000\u0000\u0000\u000b\u0000\u0000\u0000\u0008\u0000\u0018\u0000\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000��\u0000\u0000\u0000\u0000EULA.txtUT\u0005\u0000\u0003zM�cux\u000b\u0000\u0001\u0004�\u0001\u0000\u0000\u0004\u0014\u0000\u0000\u0000PK\u0005\u0006\u0000\u0000\u0000\u0000\u0001\u0000\u0001\u0000N\u0000\u0000\u0000M\u0000\u0000\u0000\u0000\u0000';
 final imagesvg =
     '<!DOCTYPE html>\n<html>\n<body>\n\n<svg height=\"100\" width=\"100\">\n  <circle cx=\"50\" cy=\"50\" r=\"40\" stroke=\"black\" stroke-width=\"3\" fill=\"red\" />\n  Sorry, your browser does not support inline SVG.  \n</svg> \n \n</body>\n</html>\n';
