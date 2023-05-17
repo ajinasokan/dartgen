@@ -308,7 +308,7 @@ class SerializeFields extends _FieldProcessor {
           serialize += "'$name': $name,";
         } else {
           serialize +=
-              "'$name': $name?.map((dynamic k, dynamic v) => MapEntry(k$type1, v$type2)),";
+              "'$name': $name${dot}map((dynamic k, dynamic v) => MapEntry(k$type1, v$type2)),";
         }
       } else if (type == 'Map') {
         serialize += "'$name': $name,";
