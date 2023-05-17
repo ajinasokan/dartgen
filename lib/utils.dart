@@ -56,7 +56,7 @@ List<FunctionDeclaration> getMethods(CompilationUnit code) {
 }
 
 String getClassName(ClassDeclaration classdec) {
-  return classdec.name.name;
+  return classdec.name.lexeme;
 }
 
 bool isStatic(MethodDeclaration field) {
@@ -64,11 +64,11 @@ bool isStatic(MethodDeclaration field) {
 }
 
 String getMethodName(MethodDeclaration field) {
-  return field.name.name;
+  return field.name.lexeme;
 }
 
 String getFieldName(FieldDeclaration field) {
-  return field.fields.variables.first.name.name;
+  return field.fields.variables.first.name.lexeme;
 }
 
 String getFieldType(FieldDeclaration field) {

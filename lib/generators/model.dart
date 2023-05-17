@@ -47,7 +47,7 @@ class ModelGenerator extends Generator {
       if (meta != 'model') continue;
 
       var metaArgs = getTagArgs(classElement);
-      var className = classElement.name.name;
+      var className = classElement.name.lexeme;
 
       List<ClassMember> fields = classElement.members;
 
@@ -144,7 +144,7 @@ class MapOfFields extends _FieldProcessor {
           .toString()
           .replaceAll('\$', '')
           .replaceAll('?', '');
-      final name = member.fields.variables.first.name.name;
+      final name = member.fields.variables.first.name.lexeme;
       final initializer = member.fields.variables.first.initializer;
 
       if ([
@@ -263,7 +263,7 @@ class SerializeFields extends _FieldProcessor {
           .toString()
           .replaceAll('\$', '')
           .replaceAll('?', '');
-      final name = member.fields.variables.first.name.name;
+      final name = member.fields.variables.first.name.lexeme;
 
       if (primitives.contains(type)) {
         serialize += "'$name': $name,";
@@ -359,7 +359,7 @@ class CloneFields extends _FieldProcessor {
 
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
-      final name = member.fields.variables.first.name.name;
+      final name = member.fields.variables.first.name.lexeme;
       clone += '$name: from.$name,';
     }
     return 'static $className clone($className from) => $className.build($clone);';
@@ -387,7 +387,7 @@ class PatchFields extends _FieldProcessor {
 
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
-      final name = member.fields.variables.first.name.name;
+      final name = member.fields.variables.first.name.lexeme;
       patchWith += '$name = clone.$name;\n';
     }
     return 'void patchWith($className clone) { $patchWith }';
@@ -411,7 +411,7 @@ class ConstructFields extends _FieldProcessor {
     var constructor = '';
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
-      final name = member.fields.variables.first.name.name;
+      final name = member.fields.variables.first.name.lexeme;
       final isNullable = member.fields.type.toString().contains('?');
       if (isNullable) {
         constructor += 'this.$name,\n';

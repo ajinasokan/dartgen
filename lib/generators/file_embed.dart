@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:strings/strings.dart' as strings;
+import 'package:strings/strings.dart';
 import 'package:slugify/slugify.dart';
 import 'package:path/path.dart' as p;
 import '../models/index.dart';
@@ -47,7 +47,7 @@ class FileEmbedGenerator extends Generator {
         final fileName = p.basename(relFilePath);
         final slug = slugify(fileName, delimiter: '');
         return 'final $slug = \'' +
-            strings.escape(File(i).readAsStringSync()) +
+            Strings.toEscaped(File(i).readAsStringSync()) +
             '\';\n';
       }).join(''));
 
