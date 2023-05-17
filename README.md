@@ -18,6 +18,12 @@ Unlike the standard code generators DartGenerate doesn't produce `.g.dart` files
 
 ## Install
 
+From pub:
+
+```shell
+$ pub global activate dartgenerate
+```
+
 From git:
 
 ```shell
