@@ -173,7 +173,7 @@ class MapOfFields extends _FieldProcessor {
         var types = type.substring(4, type.lastIndexOf('>')).split(',');
         toMap += "'$key': $name,\n";
         patcher +=
-            "$name = _data['$key'].map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}))";
+            "$name = _data['$key']${dot}map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}))";
       } else if (type.contains('List<')) {
         final listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
         if (['String', 'num', 'bool', 'dynamic'].contains(listPrimitive)) {
