@@ -1,3 +1,7 @@
+## 2.0.1
+
+- Support nullable map parsing
+
 ## 2.0.0
 
 - Dart 3 support. Thanks @hedblad.
