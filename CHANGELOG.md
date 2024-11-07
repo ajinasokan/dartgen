@@ -1,3 +1,7 @@
+## 2.0.2
+
+- Support nullable map parsing for real
+
 ## 2.0.1
 
 - Support nullable map parsing
