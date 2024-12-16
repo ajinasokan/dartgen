@@ -1,3 +1,7 @@
+## 2.0.3
+
+- Write files only if they are changed. Triggers LSP less to look for changes.
+
 ## 2.0.2
 
 - Support nullable map parsing for real
