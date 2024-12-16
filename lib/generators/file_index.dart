@@ -26,7 +26,7 @@ class FileIndexGenerator extends Generator {
 
   @override
   void process(String? path) {
-    print('Index: ${config!.dir}');
+    log('Index: ${config!.dir} ');
     final outFileName = config!.outputFile ?? 'index.dart';
     var paths = listFiles(config!.dir!, config!.recursive!)
         .map((i) => p.relative(i!, from: config!.dir))
@@ -38,7 +38,11 @@ class FileIndexGenerator extends Generator {
 
     try {
       var output = formatCode(exports.join('\n'));
-      fileWriteString(outFilePath, output);
+      if (fileWriteString(outFilePath, output)) {
+        logDone();
+      } else {
+        logNoChange();
+      }
     } catch (e) {
       print(e);
       return;

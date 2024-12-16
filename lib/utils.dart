@@ -30,8 +30,25 @@ List<String?> listFiles(String path,
 
 String fileReadString(String path) => File(path).readAsStringSync();
 
-void fileWriteString(String path, String data) =>
+bool fileWriteString(String path, String data) {
+  if (fileReadString(path) != data) {
     File(path).writeAsStringSync(data);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void log(String content) {
+  stdout.write(content);
+}
+
+void logDone() => logln('\x1b[92mDONE\x1b[0m');
+void logNoChange() => logln('\x1b[36mNO CHANGE\x1b[0m');
+
+void logln(String content) {
+  stdout.write(content + '\n');
+}
 
 CompilationUnit? parseDartFile(String path) {
   try {

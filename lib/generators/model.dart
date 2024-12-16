@@ -32,7 +32,7 @@ class ModelGenerator extends Generator {
 
   @override
   void process(String dartFile) {
-    print('Model: $dartFile');
+    log('Model: $dartFile ');
 
     var replacer = CodeReplacer(fileReadString(dartFile));
 
@@ -79,7 +79,11 @@ class ModelGenerator extends Generator {
 
     try {
       var output = formatCode(replacer.process());
-      fileWriteString(dartFile, output);
+      if (fileWriteString(dartFile, output)) {
+        logDone();
+      } else {
+        logNoChange();
+      }
     } catch (e) {
       print(e);
       return;

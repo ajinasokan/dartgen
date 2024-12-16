@@ -30,7 +30,7 @@ class EnumGenerator extends Generator {
 
   @override
   void process(String path) {
-    print('Enum: $path');
+    log('Enum: $path ');
     var replacer = CodeReplacer(fileReadString(path));
     var code = parseDartFile(path)!;
 
@@ -99,7 +99,11 @@ String toString() => value;
 
     try {
       var output = formatCode(replacer.process());
-      fileWriteString(path, output);
+      if (fileWriteString(path, output)) {
+        logDone();
+      } else {
+        logNoChange();
+      }
     } catch (e) {
       print(e);
       return;

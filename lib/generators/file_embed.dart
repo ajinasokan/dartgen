@@ -29,7 +29,7 @@ class FileEmbedGenerator extends Generator {
 
   @override
   void process(String? path) {
-    print('Embed: ${config!.dir}');
+    log('Embed: ${config!.dir} ');
     final outFileName = config!.outputFile ?? 'index.dart';
     var filesPaths = listFiles(config!.dir!, config!.recursive!, true);
 
@@ -53,7 +53,11 @@ class FileEmbedGenerator extends Generator {
             '\';\n';
       }).join(''));
 
-      fileWriteString(outFilePath, output);
+      if (fileWriteString(outFilePath, output)) {
+        logDone();
+      } else {
+        logNoChange();
+      }
     } catch (e) {
       print(e);
       return;
