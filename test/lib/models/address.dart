@@ -7,9 +7,7 @@ class Address {
 
   Address();
 
-  Address.build({
-    required this.street,
-  });
+  Address.build({required this.street});
 
   void patch(Map? _data) {
     if (_data == null) return;
@@ -22,12 +20,8 @@ class Address {
     return Address()..patch(data);
   }
 
-  Map<String, dynamic> toMap() => {
-        'street': street,
-      };
+  Map<String, dynamic> toMap() => {'street': street};
   String toJson() => json.encode(toMap());
   static Address? fromJson(String data) => Address.fromMap(json.decode(data));
-  Map<String, dynamic> serialize() => {
-        'street': street,
-      };
+  Map<String, dynamic> serialize() => {'street': street};
 }
