@@ -146,6 +146,16 @@ class MapOfFields extends _FieldProcessor {
       final key = getTag(member).split(':')[1].replaceAll('"', '');
       final isNullable = member.fields.type.toString().contains('?');
       final dot = isNullable ? '?.' : '.';
+      final typeName = (member.fields.type as NamedType).name2.toString();
+      final typeArgs =
+          (member.fields.type as NamedType).typeArguments?.arguments;
+      final leftType = (typeArgs?.elementAtOrNull(0) as NamedType?);
+      final leftName = leftType?.name2.toString() ?? 'dynamic';
+      final leftDot = (leftType?.question?.toString() ?? '') + '.';
+      final rightType = (typeArgs?.elementAtOrNull(1) as NamedType?);
+      final rightName = rightType?.name2.toString() ?? 'dynamic';
+      final rightDot = (rightType?.question?.toString() ?? '') + '.';
+
       final type = member.fields.type
           .toString()
           .replaceAll('\$', '')
@@ -175,32 +185,52 @@ class MapOfFields extends _FieldProcessor {
       } else if (enums.contains(type)) {
         toMap += "'$key': $name${dot}value,\n";
         patcher += "$name = $type.parse(_data['$key'])";
-      } else if (type.contains('Map<')) {
-        var types = type.substring(4, type.lastIndexOf('>')).split(',');
-        toMap += "'$key': $name,\n";
-        patcher +=
-            "$name = _data['$key']?.map<${types[0]}, ${types[1]}>((k, v) => MapEntry(k as ${types[0]}, v as ${types[1]}))";
-      } else if (type.contains('List<')) {
-        final listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
-        if (['String', 'num', 'bool', 'dynamic'].contains(listPrimitive)) {
+      } else if (typeName == 'Map') {
+        if (['String', 'num', 'bool', 'dynamic'].contains(rightName)) {
           toMap += "'$key': $name,\n";
-          patcher += "$name = _data['$key']?.cast<$listPrimitive>()";
-        } else if (listPrimitive == 'int') {
+          patcher +=
+              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v as $rightName))";
+        } else if (rightName == 'int') {
+          toMap += "'$key': $name,\n";
+          patcher +=
+              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v ~/ 1))";
+        } else if (rightName == 'double') {
+          toMap += "'$key': $name,\n";
+          patcher +=
+              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v * 1.0))";
+        } else if (enums.contains(rightName)) {
+          toMap +=
+              "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry(k, v${rightDot}value)),\n";
+          patcher +=
+              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.parse(v)))";
+        } else {
+          toMap +=
+              "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry(k, v${rightDot}toMap())),\n";
+          patcher +=
+              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.fromMap(v)))";
+        }
+      } else if (typeName == 'List') {
+        if (['String', 'num', 'bool', 'dynamic'].contains(leftName)) {
+          toMap += "'$key': $name,\n";
+          patcher += "$name = _data['$key']?.cast<$leftName>()";
+        } else if (leftName == 'int') {
           toMap += "'$key': $name,\n";
           patcher +=
               "$name = _data['$key']?.map((i) => i ~/ 1).toList().cast<int>()";
-        } else if (listPrimitive == 'double') {
+        } else if (leftName == 'double') {
           toMap += "'$key': $name,\n";
           patcher +=
               "$name = _data['$key']?.map((i) => i * 1.0).toList().cast<double>()";
-        } else if (enums.contains(listPrimitive)) {
-          toMap += "'$key': $name${dot}map((i) => i.value).toList(),\n";
+        } else if (enums.contains(leftName)) {
+          toMap +=
+              "'$key': $name${dot}map((i) => i${leftDot}value).toList(),\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => $listPrimitive.parse(i)).toList().cast<$listPrimitive>()";
+              "$name = _data['$key']?.map((i) => $leftName.parse(i)).toList().cast<$leftName>()";
         } else {
-          toMap += "'$key': $name${dot}map((i) => i.toMap()).toList(),\n";
+          toMap +=
+              "'$key': $name${dot}map((i) => i${leftDot}toMap()).toList(),\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => $listPrimitive.fromMap(i)).toList().cast<$listPrimitive>()";
+              "$name = _data['$key']?.map((i) => $leftName.fromMap(i)).toList().cast<$leftName>()";
         }
       } else {
         toMap += "'$key': $name${dot}toMap(),";
