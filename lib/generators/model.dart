@@ -142,7 +142,7 @@ class MapOfFields extends _FieldProcessor {
       if (!getTag(member).contains('json')) continue;
 
       final key = getTag(member).split(':')[1].replaceAll('"', '');
-      final isNullable = member.fields.type.toString().contains('?');
+      final isNullable = member.fields.type?.question != null;
       final dot = isNullable ? '?.' : '.';
       final typeName = (member.fields.type as NamedType).name2.toString();
       final typeArgs =
@@ -150,9 +150,11 @@ class MapOfFields extends _FieldProcessor {
       final leftType = (typeArgs?.elementAtOrNull(0) as NamedType?);
       final leftName = leftType?.name2.toString() ?? 'dynamic';
       final leftDot = (leftType?.question?.toString() ?? '') + '.';
+      final leftExcl = leftType?.question == null ? '!' : '';
       final rightType = (typeArgs?.elementAtOrNull(1) as NamedType?);
       final rightName = rightType?.name2.toString() ?? 'dynamic';
       final rightDot = (rightType?.question?.toString() ?? '') + '.';
+      final rightExcl = rightType?.question == null ? '!' : '';
 
       final type = member.fields.type
           .toString()
@@ -200,12 +202,12 @@ class MapOfFields extends _FieldProcessor {
           toMap +=
               "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry(k, v${rightDot}value)),\n";
           patcher +=
-              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.parse(v)))";
+              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.parse(v)$rightExcl))";
         } else {
           toMap +=
               "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry(k, v${rightDot}toMap())),\n";
           patcher +=
-              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.fromMap(v)))";
+              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.fromMap(v)$rightExcl))";
         }
       } else if (typeName == 'List') {
         if (['String', 'num', 'bool', 'dynamic'].contains(leftName)) {
@@ -223,12 +225,12 @@ class MapOfFields extends _FieldProcessor {
           toMap +=
               "'$key': $name${dot}map((i) => i${leftDot}value).toList(),\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => $leftName.parse(i)).toList().cast<$leftName>()";
+              "$name = _data['$key']?.map((i) => $leftName.parse(i)$leftExcl).toList().cast<$leftName>()";
         } else {
           toMap +=
               "'$key': $name${dot}map((i) => i${leftDot}toMap()).toList(),\n";
           patcher +=
-              "$name = _data['$key']?.map((i) => $leftName.fromMap(i)).toList().cast<$leftName>()";
+              "$name = _data['$key']?.map((i) => $leftName.fromMap(i)$leftExcl).toList().cast<$leftName>()";
         }
       } else {
         toMap += "'$key': $name${dot}toMap(),";
@@ -291,7 +293,7 @@ class SerializeFields extends _FieldProcessor {
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
 
-      final isNullable = member.fields.type.toString().contains('?');
+      final isNullable = member.fields.type?.question != null;
       final dot = isNullable ? '?.' : '.';
       final type = member.fields.type
           .toString()
@@ -446,7 +448,7 @@ class ConstructFields extends _FieldProcessor {
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
       final name = member.fields.variables.first.name.lexeme;
-      final isNullable = member.fields.type.toString().contains('?');
+      final isNullable = member.fields.type?.question != null;
       if (isNullable) {
         constructor += 'this.$name,\n';
       } else {
