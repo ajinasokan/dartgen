@@ -7,9 +7,7 @@ class Store {
 
   Store();
 
-  Store.build({
-    this.street,
-  });
+  Store.build({this.street});
 
   void patch(Map? _data) {
     if (_data == null) return;
@@ -22,17 +20,11 @@ class Store {
     return Store()..patch(data);
   }
 
-  Map<String, dynamic> toMap() => {
-        'street': street,
-      };
+  Map<String, dynamic> toMap() => {'street': street};
   String toJson() => json.encode(toMap());
   static Store? fromJson(String data) => Store.fromMap(json.decode(data));
-  Map<String, dynamic> serialize() => {
-        'street': street,
-      };
-  static Store clone(Store from) => Store.build(
-        street: from.street,
-      );
+  Map<String, dynamic> serialize() => {'street': street};
+  static Store clone(Store from) => Store.build(street: from.street);
   void patchWith(Store clone) {
     street = clone.street;
   }

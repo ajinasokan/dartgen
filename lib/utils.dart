@@ -103,7 +103,8 @@ String? getConstructorInput(FieldDeclaration field) {
 }
 
 String formatCode(String code) {
-  return DartFormatter().format(code);
+  return DartFormatter(languageVersion: DartFormatter.latestLanguageVersion)
+      .format(code);
 }
 
 String getTag(Declaration i) {
