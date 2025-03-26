@@ -191,25 +191,25 @@ class MapOfFields extends _FieldProcessor {
         if (['String', 'num', 'bool', 'dynamic'].contains(rightName)) {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v as $rightName))";
+              "$name = (_data['$key'] as Map?)?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v as $rightName))";
         } else if (rightName == 'int') {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v ~/ 1))";
+              "$name = (_data['$key'] as Map?)?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v ~/ 1))";
         } else if (rightName == 'double') {
           toMap += "'$key': $name,\n";
           patcher +=
-              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v * 1.0))";
+              "$name = (_data['$key'] as Map?)?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, v * 1.0))";
         } else if (enums.contains(rightName)) {
           toMap +=
               "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry(k, v${rightDot}value)),\n";
           patcher +=
-              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.parse(v)$rightExcl))";
+              "$name = (_data['$key'] as Map?)?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.parse(v)$rightExcl))";
         } else {
           toMap +=
               "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry(k, v${rightDot}toMap())),\n";
           patcher +=
-              "$name = _data['$key']?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.fromMap(v)$rightExcl))";
+              "$name = (_data['$key'] as Map?)?.map<$leftName, $rightName>((k, v) => MapEntry(k as $leftName, $rightName.fromMap(v)$rightExcl))";
         }
       } else if (typeName == 'List') {
         if (['String', 'num', 'bool', 'dynamic'].contains(leftName)) {
