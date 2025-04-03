@@ -60,6 +60,7 @@ $ dartgenerate watch
 ```json
 {
     "dir": "lib",
+    // "formatter_version": "3.7.0", => to use latest Dart v3.7.0 formatting
     "generators": [
         { "dir": "lib/models", "type": "model" },
         { "dir": "lib/models", "type": "index" },
@@ -75,6 +76,8 @@ $ dartgenerate watch
 Explanation:
 
 `.dir` directory to watch file changes. Run `dartgenerate watch` to take this into consideration.
+
+`.formatter_version` will set the Dart formatter version. Default is `3.0.0`. Set to `3.7.0` to apply the new formatting style.
 
 `.generators` list of all generators to run. This can be `model`, `constant`, `index` or `embed` generators. You can have more than one kind of generator executing in same directory.
 

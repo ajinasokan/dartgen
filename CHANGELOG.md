@@ -1,3 +1,8 @@
+## 2.1.0
+
+- Support Dart v3.7.0 styling. Thanks @jonaslundquist. Set `formatter_version` to `3.7.0` to apply. 
+- Better support for Maps and Lists with custom data types.
+
 ## 2.0.3
 
 - Write files only if they are changed. Triggers LSP less to look for changes.
