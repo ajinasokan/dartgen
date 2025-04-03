@@ -14,6 +14,7 @@ dependencies:
   slugify: ^2.0.0
   glob: ^2.1.1
   path: ^1.8.3
+  pub_semver: ^2.2.0
 
 dev_dependencies:
   pedantic: ^1.11.0
