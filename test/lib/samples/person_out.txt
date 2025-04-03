@@ -35,12 +35,12 @@ class Person {
     name = _data['name'] ?? name;
     age = _data['int'] ?? age;
     addresses = _data['addresses']
-            ?.map((i) => Address.fromMap(i))
+            ?.map((i) => Address.fromMap(i)!)
             .toList()
             .cast<Address>() ??
         [];
     newAddresses = _data['new_addresses']
-            ?.map((i) => Address.fromMap(i))
+            ?.map((i) => Address.fromMap(i)!)
             .toList()
             .cast<Address>() ??
         [];
