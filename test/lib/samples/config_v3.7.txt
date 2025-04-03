@@ -1,0 +1,26 @@
+{
+    "dir": "lib",
+    "formatter_version": "3.7.0",
+    "generators": [
+        {
+            "dir": "lib/models",
+            "type": "model"
+        },
+        {
+            "dir": "lib/models",
+            "type": "index"
+        },
+        {
+            "dir": "lib/constants",
+            "type": "constant"
+        },
+        {
+            "dir": "lib/constants",
+            "type": "index"
+        },
+        {
+            "dir": "lib/files",
+            "type": "embed"
+        }
+    ]
+}

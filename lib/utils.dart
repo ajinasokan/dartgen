@@ -3,6 +3,7 @@ import 'package:glob/glob.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:pub_semver/pub_semver.dart' show Version;
 
 export 'package:analyzer/dart/ast/ast.dart';
 
@@ -102,9 +103,14 @@ String? getConstructorInput(FieldDeclaration field) {
   return val.stringValue;
 }
 
-String formatCode(String code) {
-  return DartFormatter(languageVersion: DartFormatter.latestLanguageVersion)
-      .format(code);
+String formatCode(String code, String version) {
+  return DartFormatter(
+    languageVersion: switch (version) {
+      '3.7.0' => Version(3, 7, 0),
+      '3.6.0' => Version(3, 6, 0),
+      _ => Version(3, 0, 0),
+    },
+  ).format(code);
 }
 
 String getTag(Declaration i) {

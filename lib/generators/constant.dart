@@ -5,10 +5,14 @@ import '../models/generator.dart';
 
 class EnumGenerator extends Generator {
   final GeneratorConfig? config;
+  final String formatterVersion;
   final Set<String> names = {};
   String? _lastGenerated;
 
-  EnumGenerator({this.config});
+  EnumGenerator({
+    this.config,
+    required this.formatterVersion,
+  });
 
   @override
   void init() {
@@ -98,7 +102,7 @@ String toString() => value;
     });
 
     try {
-      var output = formatCode(replacer.process());
+      var output = formatCode(replacer.process(), formatterVersion);
       if (fileWriteString(path, output)) {
         logDone();
       } else {

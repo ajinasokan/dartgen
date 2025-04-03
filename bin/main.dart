@@ -6,9 +6,9 @@ import 'package:dartgenerate/models/index.dart';
 void main(List<String> arguments) {
   final configFile = File('dartgenerate.json');
 
-  Config? config;
+  late Config config;
   if (configFile.existsSync()) {
-    config = Config.fromJson(configFile.readAsStringSync());
+    config = Config.fromJson(configFile.readAsStringSync())!;
   } else {
     print('''No dartgenerate.json found in this directory.
 
@@ -26,20 +26,33 @@ Example config:
   }
 
   // generate constants first so that models can make use of it
-  config!.generators!.sort((a, b) => a.type == 'constant' ? -1 : 1);
+  config.generators.sort((a, b) => a.type == 'constant' ? -1 : 1);
 
   EnumGenerator? _lastEnumGen;
-  final generators = config.generators!.map((config) {
+  final generators = config.generators.map((genConfig) {
     Generator? g;
-    if (config.type == 'constant') {
-      g = EnumGenerator(config: config);
+    if (genConfig.type == 'constant') {
+      g = EnumGenerator(
+        config: genConfig,
+        formatterVersion: config.formatterVersion,
+      );
       _lastEnumGen = g as EnumGenerator?;
-    } else if (config.type == 'model') {
-      g = ModelGenerator(config: config, enumGenerator: _lastEnumGen);
-    } else if (config.type == 'index') {
-      g = FileIndexGenerator(config: config);
-    } else if (config.type == 'embed') {
-      g = FileEmbedGenerator(config: config);
+    } else if (genConfig.type == 'model') {
+      g = ModelGenerator(
+        config: genConfig,
+        formatterVersion: config.formatterVersion,
+        enumGenerator: _lastEnumGen,
+      );
+    } else if (genConfig.type == 'index') {
+      g = FileIndexGenerator(
+        config: genConfig,
+        formatterVersion: config.formatterVersion,
+      );
+    } else if (genConfig.type == 'embed') {
+      g = FileEmbedGenerator(
+        config: genConfig,
+        formatterVersion: config.formatterVersion,
+      );
     }
     try {
       g!.init();
@@ -53,7 +66,7 @@ Example config:
 }
 
 void watch(Config config, List<Generator?> generators) {
-  var watcher = DirectoryWatcher(config.dir!);
+  var watcher = DirectoryWatcher(config.dir);
 
   print('Watching changes..');
 

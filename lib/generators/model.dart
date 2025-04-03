@@ -3,18 +3,20 @@ import '../models/index.dart';
 import '../code_replacer.dart';
 
 class ModelGenerator extends Generator {
-  final GeneratorConfig? config;
+  final GeneratorConfig config;
+  final String formatterVersion;
   final EnumGenerator? enumGenerator;
   String? _lastGenerated;
 
   ModelGenerator({
-    this.config,
+    required this.config,
+    required this.formatterVersion,
     this.enumGenerator,
   });
 
   @override
   void init() {
-    var darts = listFiles(config!.dir!, config!.recursive!);
+    var darts = listFiles(config.dir!, config.recursive!);
     if (darts.isEmpty) return;
 
     darts.forEach((dartFile) => process(dartFile!));
@@ -22,7 +24,7 @@ class ModelGenerator extends Generator {
 
   @override
   bool shouldRun(WatchEvent event) =>
-      event.path.startsWith(config!.dir!) && event.type != ChangeType.REMOVE;
+      event.path.startsWith(config.dir!) && event.type != ChangeType.REMOVE;
 
   @override
   bool isLastGenerated(String path) => path == _lastGenerated;
@@ -78,7 +80,7 @@ class ModelGenerator extends Generator {
     }
 
     try {
-      var output = formatCode(replacer.process());
+      var output = formatCode(replacer.process(), formatterVersion);
       if (fileWriteString(dartFile, output)) {
         logDone();
       } else {

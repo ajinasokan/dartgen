@@ -16,7 +16,12 @@ class GeneratorConfig {
 
   GeneratorConfig();
 
-  GeneratorConfig.build({this.dir, this.type, this.recursive, this.outputFile});
+  GeneratorConfig.build({
+    this.dir,
+    this.type,
+    this.recursive,
+    this.outputFile,
+  });
 
   void patch(Map? _data) {
     if (_data == null) return;

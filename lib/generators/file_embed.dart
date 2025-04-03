@@ -8,18 +8,22 @@ import '../utils.dart';
 import 'dart:convert';
 
 class FileEmbedGenerator extends Generator {
-  final GeneratorConfig? config;
+  final GeneratorConfig config;
+  final String formatterVersion;
   String? _lastGenerated;
 
-  FileEmbedGenerator({this.config});
+  FileEmbedGenerator({
+    required this.config,
+    required this.formatterVersion,
+  });
 
   @override
   void init() {
-    process(config!.dir);
+    process(config.dir);
   }
 
   @override
-  bool shouldRun(WatchEvent event) => event.path.startsWith(config!.dir!);
+  bool shouldRun(WatchEvent event) => event.path.startsWith(config.dir!);
 
   @override
   bool isLastGenerated(String path) => path == _lastGenerated;
@@ -29,29 +33,31 @@ class FileEmbedGenerator extends Generator {
 
   @override
   void process(String? path) {
-    log('Embed: ${config!.dir} ');
-    final outFileName = config!.outputFile ?? 'index.dart';
-    var filesPaths = listFiles(config!.dir!, config!.recursive!, true);
+    log('Embed: ${config.dir} ');
+    final outFileName = config.outputFile ?? 'index.dart';
+    var filesPaths = listFiles(config.dir!, config.recursive!, true);
 
     var relativePaths =
-        filesPaths.map((i) => p.relative(i!, from: config!.dir)).toList();
+        filesPaths.map((i) => p.relative(i!, from: config.dir)).toList();
     relativePaths.remove(outFileName);
     if (relativePaths.isEmpty) return null;
 
-    final outFilePath = p.join(config!.dir!, outFileName);
+    final outFilePath = p.join(config.dir!, outFileName);
 
     try {
-      var output = formatCode(filesPaths.map((i) {
-        final relFilePath = p.relative(i!, from: config!.dir);
-        if (relFilePath == outFileName) return '';
+      var output = formatCode(
+          filesPaths.map((i) {
+            final relFilePath = p.relative(i!, from: config.dir);
+            if (relFilePath == outFileName) return '';
 
-        final fileName = p.basename(relFilePath);
-        final slug = slugify(fileName, delimiter: '');
-        return 'final $slug = \'' +
-            Strings.toEscaped(File(i)
-                .readAsStringSync(encoding: Utf8Codec(allowMalformed: true))) +
-            '\';\n';
-      }).join(''));
+            final fileName = p.basename(relFilePath);
+            final slug = slugify(fileName, delimiter: '');
+            return 'final $slug = \'' +
+                Strings.toEscaped(File(i).readAsStringSync(
+                    encoding: Utf8Codec(allowMalformed: true))) +
+                '\';\n';
+          }).join(''),
+          formatterVersion);
 
       if (fileWriteString(outFilePath, output)) {
         logDone();

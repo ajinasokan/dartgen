@@ -40,7 +40,27 @@ void main() {
     runGenerator();
     shouldCodeMatch(
       readFile('lib/models/store.dart'),
-      readFile('lib/samples/store_out.txt'),
+      readFile('lib/samples/store_out_v3.txt'),
+    );
+  });
+
+  test('model generation patchWith v3.7', () {
+    writeFile(
+      'lib/models/store.dart',
+      readFile('lib/samples/store_in.txt'),
+    );
+    writeFile(
+      'dartgenerate.json',
+      readFile('lib/samples/config_v3.7.txt'),
+    );
+    runGenerator();
+    shouldCodeMatch(
+      readFile('lib/models/store.dart'),
+      readFile('lib/samples/store_out_v3.7.txt'),
+    );
+    writeFile(
+      'dartgenerate.json',
+      readFile('lib/samples/config_v3.txt'),
     );
   });
 
@@ -59,9 +79,9 @@ void main() {
 
 // run generator but hide all print statements
 void runGenerator() {
-  runZoned(
+  runZonedGuarded(
     () => bin.main([]),
-    onError: (e) => throw e,
+    (e, s) => throw e,
     zoneSpecification: ZoneSpecification(
       print: (_, __, ___, ____) {},
     ),
