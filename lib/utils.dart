@@ -32,7 +32,13 @@ List<String?> listFiles(String path,
 String fileReadString(String path) => File(path).readAsStringSync();
 
 bool fileWriteString(String path, String data) {
-  if (fileReadString(path) != data) {
+  var fileString = "";
+  try {
+    fileString = fileReadString(path);
+  } catch (e) {
+    // file doesn't exist, write it
+  }
+  if (fileString != data) {
     File(path).writeAsStringSync(data);
     return true;
   } else {
