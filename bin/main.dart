@@ -6,6 +6,23 @@ import 'package:dartgenerate/models/index.dart';
 void main(List<String> arguments) {
   final configFile = File('dartgenerate.json');
 
+  // INIT COMMAND
+  if (arguments.contains('init')) {
+    if (configFile.existsSync()) {
+      print('dartgenerate.json already exists.');
+    } else {
+      configFile.writeAsStringSync('''{
+  "dir": "lib",
+  "generators": [
+    { "dir": "lib/models", "type": "model" },
+    { "dir": "lib/models", "type": "index" }
+  ]
+}''');
+      print('Created bare-bones dartgenerate.json.');
+    }
+    return;
+  }
+
   late Config config;
   if (configFile.existsSync()) {
     config = Config.fromJson(configFile.readAsStringSync())!;
