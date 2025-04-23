@@ -13,6 +13,7 @@ void main(List<String> arguments) {
     } else {
       configFile.writeAsStringSync('''{
   "dir": "lib",
+  "\$schema": "https://raw.githubusercontent.com/devaryakjha/dartgen/refs/heads/master/dartgenerate.schema.json",
   "generators": [
     { "dir": "lib/models", "type": "model" },
     { "dir": "lib/models", "type": "index" }
