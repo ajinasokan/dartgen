@@ -42,5 +42,5 @@
     }
   },
   "required": ["dir", "generators"],
-  "additionalProperties": false
+  "additionalProperties": true
 }
