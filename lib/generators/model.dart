@@ -339,6 +339,8 @@ class SerializeFields extends _FieldProcessor {
               types[1].replaceAll('List<', '').replaceAll('>', '');
           if (primitives.contains(listPrimitive)) {
             type2 = '';
+          } else {
+            type2 = '?.map((i) => i?.serialize()).toList()';
           }
         }
 
