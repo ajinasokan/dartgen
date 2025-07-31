@@ -1,5 +1,6 @@
 {
     "dir": "lib",
+    "$schema": "./dartgenerate.schema.json",
     "generators": [
         {
             "dir": "lib/models",
