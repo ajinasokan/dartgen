@@ -16,6 +16,8 @@ class Person {
   @pragma('json:new_addresses')
   List<Address>? newAddresses = [];
 
+  Map<int, List<Address>> addressMap = {};
+
   @pragma('json:dress_color')
   Color? dressColor;
 }

@@ -16,6 +16,8 @@ class Person {
   @pragma('json:new_addresses')
   List<Address>? newAddresses = [];
 
+  Map<int, List<Address>> addressMap = {};
+
   @pragma('json:dress_color')
   Color? dressColor;
 
@@ -26,6 +28,7 @@ class Person {
     this.age,
     required this.addresses,
     this.newAddresses,
+    required this.addressMap,
     this.dressColor,
   });
 
@@ -67,6 +70,8 @@ class Person {
         'addresses': addresses.map((dynamic i) => i?.serialize()).toList(),
         'newAddresses':
             newAddresses?.map((dynamic i) => i?.serialize()).toList(),
+        'addressMap': addressMap.map((dynamic k, dynamic v) =>
+            MapEntry(k, v?.map((i) => i?.serialize()).toList())),
         'dressColor': dressColor?.value,
       };
 }
