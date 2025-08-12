@@ -146,15 +146,15 @@ class MapOfFields extends _FieldProcessor {
       final key = getTag(member).split(':')[1].replaceAll('"', '');
       final isNullable = member.fields.type?.question != null;
       final dot = isNullable ? '?.' : '.';
-      final typeName = (member.fields.type as NamedType).name2.toString();
+      final typeName = (member.fields.type as NamedType).name.toString();
       final typeArgs =
           (member.fields.type as NamedType).typeArguments?.arguments;
       final leftType = (typeArgs?.elementAtOrNull(0) as NamedType?);
-      final leftName = leftType?.name2.toString() ?? 'dynamic';
+      final leftName = leftType?.name.toString() ?? 'dynamic';
       final leftDot = (leftType?.question?.toString() ?? '') + '.';
       final leftExcl = leftType?.question == null ? '!' : '';
       final rightType = (typeArgs?.elementAtOrNull(1) as NamedType?);
-      final rightName = rightType?.name2.toString() ?? 'dynamic';
+      final rightName = rightType?.name.toString() ?? 'dynamic';
       final rightDot = (rightType?.question?.toString() ?? '') + '.';
       final rightExcl = rightType?.question == null ? '!' : '';
 
