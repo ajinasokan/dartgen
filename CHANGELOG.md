@@ -1,3 +1,9 @@
+## 2.2.0
+
+- Fixed exception while writing new files. Thanks  @jonaslundquist.
+- JSON schema support for dartgenerate.json. Thanks @devaryakjha.
+- `init` command to generate dartgenerate.json. Thanks @devaryakjha.
+
 ## 2.1.0
 
 - Support Dart v3.7.0 styling. Thanks @jonaslundquist. Set `formatter_version` to `3.7.0` to apply. 
