@@ -110,11 +110,11 @@ String? getConstructorInput(FieldDeclaration field) {
 }
 
 String formatCode(String code, String version) {
+  ;
   return DartFormatter(
     languageVersion: switch (version) {
-      '3.7.0' => Version(3, 7, 0),
-      '3.6.0' => Version(3, 6, 0),
-      _ => Version(3, 0, 0),
+      '' => Version(3, 0, 0),
+      _ => Version.parse(version),
     },
   ).format(code);
 }
