@@ -1,3 +1,7 @@
+## 2.3.0
+
+- Made `formatter_version` configurable to use any version
+
 ## 2.2.0
 
 - Fixed exception while writing new files. Thanks  @jonaslundquist.
