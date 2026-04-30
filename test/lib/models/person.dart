@@ -16,6 +16,7 @@ class Person {
   @pragma('json:new_addresses')
   List<Address>? newAddresses = [];
 
+  @pragma('json:address_map')
   Map<int, List<Address>> addressMap = {};
 
   @pragma('json:dress_color')
@@ -47,6 +48,15 @@ class Person {
             .toList()
             .cast<Address>() ??
         [];
+    addressMap = (_data['address_map'] as Map?)?.map<int, List<Address>>(
+            (k, v) => MapEntry(
+                int.parse(k),
+                (v as List?)
+                        ?.map((i) => Address.fromMap(i)!)
+                        .toList()
+                        .cast<Address>() ??
+                    [])) ??
+        {};
     dressColor = Color.parse(_data['dress_color']) ?? dressColor;
   }
 
@@ -60,6 +70,8 @@ class Person {
         'int': age,
         'addresses': addresses.map((i) => i.toMap()).toList(),
         'new_addresses': newAddresses?.map((i) => i.toMap()).toList(),
+        'address_map': addressMap.map<String, dynamic>(
+            (k, v) => MapEntry(k.toString(), v.map((i) => i.toMap()).toList())),
         'dress_color': dressColor?.value,
       };
   String toJson() => json.encode(toMap());

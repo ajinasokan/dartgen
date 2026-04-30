@@ -391,12 +391,16 @@ class SerializeFields extends _FieldProcessor {
 
         if (primitives.contains(types[0].trim())) type1 = '';
         if (primitives.contains(types[1].trim())) type2 = '';
+        if (enums.contains(types[0].trim())) type1 = '?.value';
+        if (enums.contains(types[1].trim())) type2 = '?.value';
 
         if (types[0].startsWith('List<')) {
           var listPrimitive =
               types[0].replaceAll('List<', '').replaceAll('>', '');
           if (primitives.contains(listPrimitive)) {
             type1 = '';
+          } else if (enums.contains(listPrimitive)) {
+            type1 = '?.map((i) => i?.value).toList()';
           }
         }
 
@@ -405,6 +409,8 @@ class SerializeFields extends _FieldProcessor {
               types[1].replaceAll('List<', '').replaceAll('>', '');
           if (primitives.contains(listPrimitive)) {
             type2 = '';
+          } else if (enums.contains(listPrimitive)) {
+            type2 = '?.map((i) => i?.value).toList()';
           } else {
             type2 = '?.map((i) => i?.serialize()).toList()';
           }

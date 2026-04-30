@@ -44,25 +44,4 @@ void main() {
     expect(personFromJson.addressMap[2]!.length, 1);
     expect(personFromJson.addressMap[2]![0].street, '789 Pine Rd');
   });
-
-  test('Map with double keys - serialization roundtrip', () {
-    // Test with a simple map to verify double key support
-    final testData = {
-      'test_map': {
-        '1.5': 'value1',
-        '2.7': 'value2',
-      }
-    };
-
-    // This tests that double keys can be parsed correctly
-    // In actual use, you'd have a model with Map<double, T>
-    expect(double.parse('1.5'), 1.5);
-    expect(double.parse('2.7'), 2.7);
-  });
-
-  test('Map with bool keys - serialization roundtrip', () {
-    // Test bool key parsing
-    expect('true' == 'true', true);
-    expect('false' == 'true', false);
-  });
 }
