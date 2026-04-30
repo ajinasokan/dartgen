@@ -51,13 +51,19 @@ class ModelGenerator extends Generator {
       var metaArgs = getTagArgs(classElement);
       var className = classElement.name.lexeme;
 
+      // Extract generic type parameters from class declaration (e.g., T from class Foo<T>)
+      final typeParams = classElement.typeParameters?.typeParameters
+              .map((tp) => tp.name.lexeme)
+              .toSet() ??
+          <String>{};
+
       List<ClassMember> fields = classElement.members;
 
       final processes = <_FieldProcessor>[
         ConstructFields(className: className),
         MapOfFields(className: className, enums: enums),
         JsonOfFields(className: className),
-        SerializeFields(enums: enums),
+        SerializeFields(enums: enums, typeParams: typeParams),
         CloneFields(className: className, enabled: metaArgs.contains('clone')),
         PatchFields(
             className: className, enabled: metaArgs.contains('patchWith')),
@@ -349,9 +355,11 @@ class JsonOfFields extends _FieldProcessor {
 
 class SerializeFields extends _FieldProcessor {
   final Set<String> enums;
+  final Set<String> typeParams;
 
   SerializeFields({
     required this.enums,
+    required this.typeParams,
   });
 
   @override
@@ -403,7 +411,12 @@ class SerializeFields extends _FieldProcessor {
             !isKeyString && ['num', 'bool', 'int', 'double'].contains(keyType);
         final keyExpr = needsKeyConversion ? 'k.toString()' : 'k';
 
-        var valueExpr = 'v${valueDot}serialize()';
+        // Check if value is a generic type parameter from class declaration
+        final isGenericValueType = typeParams.contains(valueType);
+
+        var valueExpr = isGenericValueType
+            ? 'v?.serialize()'
+            : 'v${valueDot}serialize()';
 
         if (primitives.contains(valueType)) {
           valueExpr = 'v';
@@ -412,10 +425,14 @@ class SerializeFields extends _FieldProcessor {
         } else if (valueType.startsWith('List<')) {
           var listPrimitive =
               valueType.replaceAll('List<', '').replaceAll('>', '');
+          final isGenericListType = typeParams.contains(listPrimitive);
           if (primitives.contains(listPrimitive)) {
             valueExpr = 'v';
           } else if (enums.contains(listPrimitive)) {
             valueExpr = 'v${valueDot}map((i) => i.value).toList()';
+          } else if (isGenericListType) {
+            valueExpr =
+                'v${valueDot}map((dynamic i) => i?.serialize()).toList()';
           } else {
             valueExpr = 'v${valueDot}map((i) => i.serialize()).toList()';
           }
@@ -433,10 +450,17 @@ class SerializeFields extends _FieldProcessor {
         final dotMap = isNullable ? '?.map' : '.map';
         final listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
 
+        // Check if it's a generic type parameter from class declaration
+        final isGenericType = typeParams.contains(listPrimitive);
+
         if (primitives.contains(listPrimitive)) {
           serialize += "'$name': $name,";
         } else if (enums.contains(listPrimitive)) {
           serialize += "'$name': $name$dotMap((i) => i.value).toList(),";
+        } else if (isGenericType) {
+          // For generic types, use dynamic with null-safe call since T might not have serialize()
+          serialize +=
+              "'$name': $name$dotMap((dynamic i) => i?.serialize()).toList(),";
         } else {
           serialize += "'$name': $name$dotMap((i) => i.serialize()).toList(),";
         }
