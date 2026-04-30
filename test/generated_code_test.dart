@@ -27,7 +27,7 @@ void main() {
 
   test('model encode', () {
     expect(Person().toJson(),
-        '{"name":null,"int":null,"addresses":[],"new_addresses":[],"dress_color":null}');
+        '{"name":null,"int":null,"addresses":[],"new_addresses":[],"address_map":{},"dress_color":null}');
   });
 
   test('model decode', () {

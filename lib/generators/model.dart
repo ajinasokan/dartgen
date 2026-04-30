@@ -196,7 +196,8 @@ class MapOfFields extends _FieldProcessor {
       } else if (typeName == 'Map') {
         // Determine if key needs string conversion for JSON serialization
         final isKeyString = leftName == 'String';
-        final needsKeyConversion = !isKeyString && ['num', 'bool', 'int', 'double'].contains(leftName);
+        final needsKeyConversion =
+            !isKeyString && ['num', 'bool', 'int', 'double'].contains(leftName);
 
         // Helper to convert key to string in toMap
         final keyToString = needsKeyConversion ? 'k.toString()' : 'k';
@@ -217,12 +218,14 @@ class MapOfFields extends _FieldProcessor {
           }
         }
 
-        final parsedKey = needsKeyConversion ? parseKey(leftName) : 'k as $leftName';
+        final parsedKey =
+            needsKeyConversion ? parseKey(leftName) : 'k as $leftName';
 
         if (['String', 'num', 'bool', 'dynamic'].contains(rightName)) {
           // For primitive values
           if (needsKeyConversion || leftName == 'dynamic') {
-            toMap += "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry($keyToString, v)),\n";
+            toMap +=
+                "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry($keyToString, v)),\n";
           } else {
             toMap += "'$key': $name,\n";
           }
@@ -230,7 +233,8 @@ class MapOfFields extends _FieldProcessor {
               "$name = (_data['$key'] as Map?)?.map<$leftName, $rightName>((k, v) => MapEntry($parsedKey, v as $rightName))";
         } else if (rightName == 'int') {
           if (needsKeyConversion || leftName == 'dynamic') {
-            toMap += "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry($keyToString, v)),\n";
+            toMap +=
+                "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry($keyToString, v)),\n";
           } else {
             toMap += "'$key': $name,\n";
           }
@@ -238,7 +242,8 @@ class MapOfFields extends _FieldProcessor {
               "$name = (_data['$key'] as Map?)?.map<$leftName, $rightName>((k, v) => MapEntry($parsedKey, v ~/ 1))";
         } else if (rightName == 'double') {
           if (needsKeyConversion || leftName == 'dynamic') {
-            toMap += "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry($keyToString, v)),\n";
+            toMap +=
+                "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry($keyToString, v)),\n";
           } else {
             toMap += "'$key': $name,\n";
           }
@@ -251,16 +256,21 @@ class MapOfFields extends _FieldProcessor {
               "$name = (_data['$key'] as Map?)?.map<$leftName, $rightName>((k, v) => MapEntry($parsedKey, $rightName.parse(v)$rightExcl))";
         } else if (rightName == 'List') {
           // Handle Map<K, List<V>> types
-          final listValueType = (rightType?.typeArguments?.arguments.elementAtOrNull(0) as NamedType?);
+          final listValueType = (rightType?.typeArguments?.arguments
+              .elementAtOrNull(0) as NamedType?);
           final listValueName = listValueType?.name.toString() ?? 'dynamic';
-          final listValueDot = (listValueType?.question?.toString() ?? '') + '.';
+          final listValueDot =
+              (listValueType?.question?.toString() ?? '') + '.';
           final listValueExcl = listValueType?.question == null ? '!' : '';
           // Get the full type string for the List (e.g., "List<Address>")
-          final fullListType = rightType.toString().replaceAll('\$', '').replaceAll('?', '');
+          final fullListType =
+              rightType.toString().replaceAll('\$', '').replaceAll('?', '');
 
-          if (['String', 'num', 'bool', 'dynamic', 'int', 'double'].contains(listValueName)) {
+          if (['String', 'num', 'bool', 'dynamic', 'int', 'double']
+              .contains(listValueName)) {
             if (needsKeyConversion || leftName == 'dynamic') {
-              toMap += "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry($keyToString, v)),\n";
+              toMap +=
+                  "'$key': $name${dot}map<String, dynamic>((k,v) => MapEntry($keyToString, v)),\n";
             } else {
               toMap += "'$key': $name,\n";
             }
@@ -369,6 +379,9 @@ class SerializeFields extends _FieldProcessor {
     for (var member in members) {
       if (!(member is FieldDeclaration)) continue;
 
+      final fieldType = member.fields.type;
+      final namedType = fieldType is NamedType ? fieldType : null;
+      final typeArgs = namedType?.typeArguments?.arguments;
       final isNullable = member.fields.type?.question != null;
       final dot = isNullable ? '?.' : '.';
       final type = member.fields.type
@@ -388,20 +401,9 @@ class SerializeFields extends _FieldProcessor {
       } else if (enums.contains(type)) {
         serialize += "'$name': $name${dot}value,";
       } else if (type.contains('Map<')) {
-        var types = type
-            .substring(4, type.lastIndexOf('>'))
-            .split(',')
-            .map((e) => e.trim())
-            .toList();
-
-        final keyType = types[0].trim();
-        final valueType = types[1].trim();
-
-        // Check if value type is nullable (from original type string)
-        final originalValueType = (member.fields.type as NamedType)
-            .typeArguments
-            ?.arguments
-            .elementAtOrNull(1);
+        final keyType = _cleanType(typeArgs?.elementAtOrNull(0));
+        final originalValueType = typeArgs?.elementAtOrNull(1);
+        final valueType = _cleanType(originalValueType);
         final isValueNullable = originalValueType?.question != null;
         final valueDot = isValueNullable ? '?.' : '.';
 
@@ -415,7 +417,7 @@ class SerializeFields extends _FieldProcessor {
         final isGenericValueType = typeParams.contains(valueType);
 
         var valueExpr = isGenericValueType
-            ? 'v?.serialize()'
+            ? '(v as dynamic)?.serialize()'
             : 'v${valueDot}serialize()';
 
         if (primitives.contains(valueType)) {
@@ -423,18 +425,23 @@ class SerializeFields extends _FieldProcessor {
         } else if (enums.contains(valueType)) {
           valueExpr = 'v${valueDot}value';
         } else if (valueType.startsWith('List<')) {
-          var listPrimitive =
-              valueType.replaceAll('List<', '').replaceAll('>', '');
+          final valueNamedType =
+              originalValueType is NamedType ? originalValueType : null;
+          final listValueType =
+              valueNamedType?.typeArguments?.arguments.elementAtOrNull(0);
+          final listPrimitive = _cleanType(listValueType);
+          final listItemDot = listValueType?.question == null ? '.' : '?.';
           final isGenericListType = typeParams.contains(listPrimitive);
           if (primitives.contains(listPrimitive)) {
             valueExpr = 'v';
           } else if (enums.contains(listPrimitive)) {
-            valueExpr = 'v${valueDot}map((i) => i.value).toList()';
+            valueExpr = 'v${valueDot}map((i) => i${listItemDot}value).toList()';
           } else if (isGenericListType) {
             valueExpr =
-                'v${valueDot}map((dynamic i) => i?.serialize()).toList()';
+                'v${valueDot}map((i) => (i as dynamic)?.serialize()).toList()';
           } else {
-            valueExpr = 'v${valueDot}map((i) => i.serialize()).toList()';
+            valueExpr =
+                'v${valueDot}map((i) => i${listItemDot}serialize()).toList()';
           }
         }
 
@@ -448,7 +455,9 @@ class SerializeFields extends _FieldProcessor {
         serialize += "'$name': $name,";
       } else if (type.contains('List<')) {
         final dotMap = isNullable ? '?.map' : '.map';
-        final listPrimitive = type.replaceAll('List<', '').replaceAll('>', '');
+        final listValueType = typeArgs?.elementAtOrNull(0);
+        final listPrimitive = _cleanType(listValueType);
+        final listItemDot = listValueType?.question == null ? '.' : '?.';
 
         // Check if it's a generic type parameter from class declaration
         final isGenericType = typeParams.contains(listPrimitive);
@@ -456,13 +465,15 @@ class SerializeFields extends _FieldProcessor {
         if (primitives.contains(listPrimitive)) {
           serialize += "'$name': $name,";
         } else if (enums.contains(listPrimitive)) {
-          serialize += "'$name': $name$dotMap((i) => i.value).toList(),";
+          serialize +=
+              "'$name': $name$dotMap((i) => i${listItemDot}value).toList(),";
         } else if (isGenericType) {
           // For generic types, use dynamic with null-safe call since T might not have serialize()
           serialize +=
-              "'$name': $name$dotMap((dynamic i) => i?.serialize()).toList(),";
+              "'$name': $name$dotMap((i) => (i as dynamic)?.serialize()).toList(),";
         } else {
-          serialize += "'$name': $name$dotMap((i) => i.serialize()).toList(),";
+          serialize +=
+              "'$name': $name$dotMap((i) => i${listItemDot}serialize()).toList(),";
         }
       } else {
         if (isNullable) {
@@ -475,6 +486,9 @@ class SerializeFields extends _FieldProcessor {
 
     return 'Map<String, dynamic> serialize() => {$serialize};';
   }
+
+  String _cleanType(Object? type) =>
+      type?.toString().replaceAll('\$', '').replaceAll('?', '') ?? 'dynamic';
 
   @override
   bool isGenerated(ClassMember member) {
