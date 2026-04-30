@@ -79,11 +79,10 @@ class Person {
   Map<String, dynamic> serialize() => {
         'name': name,
         'age': age,
-        'addresses': addresses.map((dynamic i) => i?.serialize()).toList(),
-        'newAddresses':
-            newAddresses?.map((dynamic i) => i?.serialize()).toList(),
-        'addressMap': addressMap.map((dynamic k, dynamic v) =>
-            MapEntry(k, v?.map((i) => i?.serialize()).toList())),
+        'addresses': addresses.map((i) => i.serialize()).toList(),
+        'newAddresses': newAddresses?.map((i) => i.serialize()).toList(),
+        'addressMap': addressMap.map<String, dynamic>((k, v) =>
+            MapEntry(k.toString(), v.map((i) => i.serialize()).toList())),
         'dressColor': dressColor?.value,
       };
 }

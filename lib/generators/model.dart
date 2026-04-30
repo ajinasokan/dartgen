@@ -386,41 +386,46 @@ class SerializeFields extends _FieldProcessor {
             .map((e) => e.trim())
             .toList();
 
-        var type1 = '?.serialize()';
-        var type2 = '?.serialize()';
+        final keyType = types[0].trim();
+        final valueType = types[1].trim();
 
-        if (primitives.contains(types[0].trim())) type1 = '';
-        if (primitives.contains(types[1].trim())) type2 = '';
-        if (enums.contains(types[0].trim())) type1 = '?.value';
-        if (enums.contains(types[1].trim())) type2 = '?.value';
+        // Check if value type is nullable (from original type string)
+        final originalValueType = (member.fields.type as NamedType)
+            .typeArguments
+            ?.arguments
+            .elementAtOrNull(1);
+        final isValueNullable = originalValueType?.question != null;
+        final valueDot = isValueNullable ? '?.' : '.';
 
-        if (types[0].startsWith('List<')) {
+        // Determine if key needs string conversion for JSON serialization
+        final isKeyString = keyType == 'String';
+        final needsKeyConversion =
+            !isKeyString && ['num', 'bool', 'int', 'double'].contains(keyType);
+        final keyExpr = needsKeyConversion ? 'k.toString()' : 'k';
+
+        var valueExpr = 'v${valueDot}serialize()';
+
+        if (primitives.contains(valueType)) {
+          valueExpr = 'v';
+        } else if (enums.contains(valueType)) {
+          valueExpr = 'v${valueDot}value';
+        } else if (valueType.startsWith('List<')) {
           var listPrimitive =
-              types[0].replaceAll('List<', '').replaceAll('>', '');
+              valueType.replaceAll('List<', '').replaceAll('>', '');
           if (primitives.contains(listPrimitive)) {
-            type1 = '';
+            valueExpr = 'v';
           } else if (enums.contains(listPrimitive)) {
-            type1 = '?.map((i) => i?.value).toList()';
-          }
-        }
-
-        if (types[1].startsWith('List<')) {
-          var listPrimitive =
-              types[1].replaceAll('List<', '').replaceAll('>', '');
-          if (primitives.contains(listPrimitive)) {
-            type2 = '';
-          } else if (enums.contains(listPrimitive)) {
-            type2 = '?.map((i) => i?.value).toList()';
+            valueExpr = 'v${valueDot}map((i) => i.value).toList()';
           } else {
-            type2 = '?.map((i) => i?.serialize()).toList()';
+            valueExpr = 'v${valueDot}map((i) => i.serialize()).toList()';
           }
         }
 
-        if (type1 == '' && type2 == '') {
+        if (!needsKeyConversion && valueExpr == 'v') {
           serialize += "'$name': $name,";
         } else {
           serialize +=
-              "'$name': $name${dot}map((dynamic k, dynamic v) => MapEntry(k$type1, v$type2)),";
+              "'$name': $name${dot}map<String, dynamic>((k, v) => MapEntry($keyExpr, $valueExpr)),";
         }
       } else if (type == 'Map') {
         serialize += "'$name': $name,";
@@ -431,11 +436,9 @@ class SerializeFields extends _FieldProcessor {
         if (primitives.contains(listPrimitive)) {
           serialize += "'$name': $name,";
         } else if (enums.contains(listPrimitive)) {
-          serialize +=
-              "'$name': $name$dotMap((dynamic i) => i?.value).toList(),";
+          serialize += "'$name': $name$dotMap((i) => i.value).toList(),";
         } else {
-          serialize +=
-              "'$name': $name$dotMap((dynamic i) => i?.serialize()).toList(),";
+          serialize += "'$name': $name$dotMap((i) => i.serialize()).toList(),";
         }
       } else {
         if (isNullable) {
