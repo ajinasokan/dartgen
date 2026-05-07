@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:analyzer/dart/analysis/features.dart';
-import 'package:analyzer/dart/analysis/utilities.dart' as analyzer;
 import 'package:dartgenerate/dartgenerate.dart';
 import 'package:dartgenerate/models/index.dart';
 import 'package:path/path.dart' as p;
@@ -68,6 +66,13 @@ part /* comments between tokens are legal */ of sample;
 class NamedDetail {}
 ''');
 
+      expect(isPartFile('${libDir.path}/helper.dart'), isFalse);
+      expect(isPartFile('${libDir.path}/normal.dart'), isFalse);
+      expect(isPartFile('${libDir.path}/annotated_normal.dart'), isFalse);
+      expect(isPartFile('${libDir.path}/src/detail.dart'), isTrue);
+      expect(isPartFile('${libDir.path}/src/annotated_detail.dart'), isTrue);
+      expect(isPartFile('${libDir.path}/src/named_detail.dart'), isTrue);
+
       Directory.current = tempDir;
       FileIndexGenerator(
         config: GeneratorConfig.build(
@@ -93,7 +98,7 @@ export 'normal.dart';
     }
   });
 
-  test('index generation matches analyzer part-of directives', () {
+  test('index generation uses AST parsing for part-of directives', () {
     final tempDir = Directory.systemTemp.createTempSync('dartgen_index_');
     final currentDir = Directory.current;
     try {
@@ -158,7 +163,7 @@ class AnnotatedPart {}
 
       expect(
         File('${libDir.path}/index.dart').readAsStringSync(),
-        _expectedIndexFromAnalyzer(libDir),
+        _expectedIndex(libDir),
       );
     } finally {
       Directory.current = currentDir;
@@ -167,21 +172,14 @@ class AnnotatedPart {}
   });
 }
 
-String _expectedIndexFromAnalyzer(Directory libDir) {
+String _expectedIndex(Directory libDir) {
   final paths = libDir
       .listSync(recursive: true)
       .whereType<File>()
       .map((file) => file.path)
       .where((path) => p.extension(path) == '.dart')
       .where((path) => p.basename(path) != 'index.dart')
-      .where((path) {
-        final result = analyzer.parseFile(
-          path: path,
-          featureSet: FeatureSet.latestLanguageVersion(),
-          throwIfDiagnostics: false,
-        );
-        return result.unit.directives.whereType<PartOfDirective>().isEmpty;
-      })
+      .where((path) => !isPartFile(path))
       .map((path) => p.relative(path, from: libDir.path))
       .toList()
     ..sort();
