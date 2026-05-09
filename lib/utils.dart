@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:glob/glob.dart';
 import 'package:dart_style/dart_style.dart';
+import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:pub_semver/pub_semver.dart' show Version;
@@ -62,6 +63,20 @@ CompilationUnit? parseDartFile(String path) {
     return parseString(content: fileReadString(path)).unit;
   } catch (e) {
     return null;
+  }
+}
+
+bool isPartFile(String path) {
+  try {
+    final result = parseFile(
+      path: File(path).absolute.path,
+      featureSet: FeatureSet.latestLanguageVersion(),
+      throwIfDiagnostics: false,
+    );
+
+    return result.unit.directives.whereType<PartOfDirective>().isNotEmpty;
+  } catch (e) {
+    return false;
   }
 }
 

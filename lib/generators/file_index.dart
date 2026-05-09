@@ -33,6 +33,7 @@ class FileIndexGenerator extends Generator {
     log('Index: ${config.dir} ');
     final outFileName = config.outputFile ?? 'index.dart';
     var paths = listFiles(config.dir!, config.recursive!)
+        .where((i) => !isPartFile(i!))
         .map((i) => p.relative(i!, from: config.dir))
         .toList();
     paths.remove(outFileName);
