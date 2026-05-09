@@ -1,6 +1,6 @@
 name: dartgenerate
 description: An inline generator collection for Dart.
-version: 2.3.0
+version: 2.4.0
 homepage: https://github.com/ajinasokan/dartgen
 
 environment:

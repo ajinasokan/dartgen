@@ -47,6 +47,6 @@ class Config {
   Map<String, dynamic> serialize() => {
         'formatterVersion': formatterVersion,
         'dir': dir,
-        'generators': generators.map((dynamic i) => i?.serialize()).toList(),
+        'generators': generators.map((i) => i.serialize()).toList(),
       };
 }
