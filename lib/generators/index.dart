@@ -1,3 +1,4 @@
+export 'assets.dart';
 export 'constant.dart';
 export 'file_embed.dart';
 export 'file_index.dart';

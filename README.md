@@ -12,6 +12,7 @@ Unlike the standard code generators DartGenerate doesn't produce `.g.dart` files
 - Generate model serializers. You can add enums inside these models as well.
 - Generate index from a directory. This file will export all the `.dart` files.
 - Embed files from a directory.
+- Generate asset path constants from an assets directory.
 - Watches for file changes.
 - Config file to setup multiple generators.
 - Option to enable recursive travel of dirs.
@@ -68,7 +69,8 @@ $ dartgenerate watch
         { "dir": "lib/constants", "type": "index" },
         { "dir": "lib/components", "type": "index", "recursive": true },
         { "dir": "lib/screens", "type": "index", "recursive": true },
-        { "dir": "lib/svgs", "type": "embed" }
+        { "dir": "lib/svgs", "type": "embed" },
+        { "dir": "assets", "type": "assets", "exclude_dirs": ["fonts"], "output_file": "lib/constants/assets.dart" }
     ]
 }
 ```
@@ -79,13 +81,17 @@ Explanation:
 
 `.formatter_version` will set the Dart formatter version. Default is `3.0.0`. Set to `3.9.0` to apply the new formatting style.
 
-`.generators` list of all generators to run. This can be `model`, `constant`, `index` or `embed` generators. You can have more than one kind of generator executing in same directory.
+`.generators` list of all generators to run. This can be `model`, `constant`, `index`, `embed` or `assets` generators. You can have more than one kind of generator executing in same directory.
 
 `.generators.dir` sets the directory to run a particular generator.
 
 `.generators.type` sets the type of the generator to run in the above directory.
 
 `.generators.recursive` sets whether to run this generator recursively in the directory.
+
+`.generators.output_file` sets the generated file path for generators that write a named output. For the `assets` generator this defaults to `lib/constants/assets.dart`.
+
+`.generators.exclude_dirs` sets directory basenames to skip. For example, an assets generator can use `["fonts"]` if fonts are referenced separately through `pubspec.yaml`.
 
 An example of usage can be found [here](EXAMPLE.md) and in `/test` directory.
 
@@ -198,6 +204,38 @@ You can enable embedding generator in `dartgenerate.json` for a directory and it
 final eulatxt = 'MIT License';
 final imagesvg =
     '<!DOCTYPE html>\n<html>\n<body>\n\n<svg height=\"100\" width=\"100\">\n  <circle cx=\"50\" cy=\"50\" r=\"40\" stroke=\"black\" stroke-width=\"3\" fill=\"red\" />\n  Sorry, your browser does not support inline SVG.  \n</svg> \n \n</body>\n</html>\n';
+```
+
+### Generating asset constants
+
+If you keep Flutter assets under an `assets/` directory, DartGenerate can produce an `Assets` class with static path constants. It scans immediate subdirectories under the configured assets directory, ignores hidden files and keeps nested asset paths.
+
+Enable it in `dartgenerate.json` with:
+
+```json
+{ "dir": "assets", "type": "assets", "exclude_dirs": ["fonts"], "output_file": "lib/constants/assets.dart" }
+```
+
+For files like:
+
+```text
+assets/images/logo.svg
+assets/images/navigation/menu-icon.svg
+```
+
+It generates:
+
+```dart
+class Assets {
+  Assets._();
+
+  /// assets/images/logo.svg
+  static const String imagesLogo = 'assets/images/logo.svg';
+
+  /// assets/images/navigation/menu-icon.svg
+  static const String imagesNavigationMenuIcon =
+      'assets/images/navigation/menu-icon.svg';
+}
 ```
 
 ## License

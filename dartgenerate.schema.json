@@ -24,8 +24,8 @@
                     },
                     "type": {
                         "type": "string",
-                        "enum": ["model", "constant", "index", "embed"],
-                        "description": "Type of generator. One of: 'model', 'constant', 'index', 'embed'."
+                        "enum": ["model", "constant", "index", "embed", "assets"],
+                        "description": "Type of generator. One of: 'model', 'constant', 'index', 'embed', 'assets'."
                     },
                     "recursive": {
                         "type": "boolean",
@@ -34,6 +34,13 @@
                     "output_file": {
                         "type": "string",
                         "description": "Custom output file name for this generator. Optional."
+                    },
+                    "exclude_dirs": {
+                        "type": "array",
+                        "description": "Directory basenames to exclude from this generator. Optional.",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "required": ["dir", "type"],

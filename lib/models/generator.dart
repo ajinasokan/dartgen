@@ -14,6 +14,9 @@ class GeneratorConfig {
   @pragma('json:output_file')
   String? outputFile;
 
+  @pragma('json:exclude_dirs')
+  List<String> excludeDirs = [];
+
   GeneratorConfig();
 
   GeneratorConfig.build({
@@ -21,6 +24,7 @@ class GeneratorConfig {
     this.type,
     this.recursive,
     this.outputFile,
+    this.excludeDirs = const [],
   });
 
   void patch(Map? _data) {
@@ -30,6 +34,11 @@ class GeneratorConfig {
     type = _data['type'] ?? type;
     recursive = _data['recursive'] ?? false;
     outputFile = _data['output_file'] ?? outputFile;
+    excludeDirs = _data['exclude_dirs']
+            ?.map((i) => i.toString())
+            .toList()
+            .cast<String>() ??
+        [];
   }
 
   static GeneratorConfig? fromMap(Map? data) {
@@ -42,6 +51,7 @@ class GeneratorConfig {
         'type': type,
         'recursive': recursive,
         'output_file': outputFile,
+        'exclude_dirs': excludeDirs,
       };
   String toJson() => json.encode(toMap());
   static GeneratorConfig? fromJson(String data) =>
@@ -51,5 +61,6 @@ class GeneratorConfig {
         'type': type,
         'recursive': recursive,
         'outputFile': outputFile,
+        'excludeDirs': excludeDirs,
       };
 }
