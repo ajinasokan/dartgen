@@ -4,6 +4,9 @@ import '../bin/main.dart' as bin;
 import 'package:test/test.dart';
 
 void main() {
+  setUp(_resetTestFiles);
+  tearDown(_deleteGeneratedAssets);
+
   test('enum generation', () {
     writeFile(
       'lib/constants/colors.dart',
@@ -75,6 +78,49 @@ void main() {
       readFile('lib/samples/index_out.txt'),
     );
   });
+
+  test('assets index generation', () {
+    writeFile('dartgenerate.json', '''
+{
+  "dir": "lib",
+  "generators": [
+    {
+      "dir": "assets",
+      "type": "assets",
+      "exclude_dirs": ["fonts"],
+      "output_file": "lib/constants/assets.dart"
+    }
+  ]
+}
+''');
+    runGenerator();
+    shouldCodeMatch(
+      readFile('lib/constants/assets.dart'),
+      readFile('lib/samples/assets_out.txt'),
+    );
+    writeFile('dartgenerate.json', readFile('lib/samples/config_v3.txt'));
+  });
+
+  test('assets index generation includes fonts by default', () {
+    writeFile('dartgenerate.json', '''
+{
+  "dir": "lib",
+  "generators": [
+    {
+      "dir": "assets",
+      "type": "assets",
+      "output_file": "lib/constants/assets.dart"
+    }
+  ]
+}
+''');
+    runGenerator();
+    shouldCodeMatch(
+      readFile('lib/constants/assets.dart'),
+      readFile('lib/samples/assets_with_fonts_out.txt'),
+    );
+    writeFile('dartgenerate.json', readFile('lib/samples/config_v3.txt'));
+  });
 }
 
 // run generator but hide all print statements
@@ -103,3 +149,13 @@ void writeFile(String path, String content) => File(path)
   ..writeAsStringSync(content);
 
 String readFile(String path) => File(path).readAsStringSync();
+
+void _deleteGeneratedAssets() {
+  final file = File('lib/constants/assets.dart');
+  if (file.existsSync()) file.deleteSync();
+}
+
+void _resetTestFiles() {
+  _deleteGeneratedAssets();
+  writeFile('dartgenerate.json', readFile('lib/samples/config_v3.txt'));
+}

@@ -71,6 +71,11 @@ Example config:
         config: genConfig,
         formatterVersion: config.formatterVersion,
       );
+    } else if (genConfig.type == 'assets') {
+      g = AssetsGenerator(
+        config: genConfig,
+        formatterVersion: config.formatterVersion,
+      );
     }
     try {
       g!.init();
